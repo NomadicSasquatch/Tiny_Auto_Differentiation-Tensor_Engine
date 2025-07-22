@@ -65,7 +65,7 @@ typedef struct {
 
 typedef struct {
     Node** nodes;
-    size_t n;
+    size_t size;
     size_t capacity;
 } Graph;
 
