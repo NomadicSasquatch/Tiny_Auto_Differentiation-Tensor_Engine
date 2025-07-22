@@ -27,7 +27,7 @@ extern "C" {
         exit(EXIT_FAILURE);                      \
     } while(0)
 
-// round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access
+// round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof()
 #define ALIGN_UP(p, a)                           \
         (void*)((((uintptr_t)(p) + ((a)-1)) & ~((uintptr_t)((a)-1))))
 
