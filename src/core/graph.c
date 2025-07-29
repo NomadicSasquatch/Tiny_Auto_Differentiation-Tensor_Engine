@@ -23,7 +23,7 @@ Tensor* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
     // TODO: determine the shape
     int64_t out_shape = {0};
     // TODO: where should arena be, fix dimensions
-    node->out = tensor_new(/*arena here*/, inputs[0]->out->data, /*n_dimensions*/1, out_shape);
+    node->out = tensor_new(/*arena here*/, inputs[0]->out->data, /*n_dimensions*/, out_shape);
     atomic_init(&node->pending_parents, 0);
     graph->nodes[graph->size++] = node;
 

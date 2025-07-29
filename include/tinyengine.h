@@ -98,7 +98,7 @@ static inline void arena_init(Arena* arena, size_t bytes) {
         was added in Linux 2.4.
     */
 
-    void* ptr = mmap(NULL, bytes, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+    void* ptr = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 
     if(ptr == NULL) {
         fatal("mmap: %s", strerror(errno));

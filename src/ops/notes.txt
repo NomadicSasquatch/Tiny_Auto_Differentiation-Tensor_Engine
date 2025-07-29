@@ -1,0 +1,3 @@
+================================================ NOTES ================================================
+1. The operations modularised into .c files (Translation Units), with the intention of keeping the rebuilds fast
+2. There was a consideration on whether the computational graph for the automatic differentiation should be an implicit tape, or an explicit declaration of graphs and nodes, but I decided to go with the latter.
