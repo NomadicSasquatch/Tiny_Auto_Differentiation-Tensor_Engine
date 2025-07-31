@@ -1,4 +1,5 @@
 #include "tinyengine.h"
+#include "op.h"
 
 // graph capacity is hardcoded to a small value initially first, reinitialisation is done through realloc if size >= capacity
 void graph_init(Graph* graph) {

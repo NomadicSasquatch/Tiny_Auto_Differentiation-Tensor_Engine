@@ -9,6 +9,7 @@
 // Format: typedef {return_type} (*{function_name})({parameter_list});
 typedef void (*OpForward)(Node*);
 typedef void (*OpBackward)(Node*);
+typedef enum { OP_ADD, OP_MUL, OP_MATMUL, OP_RELU, OP_SOFTMAX } Op;
 
 typedef struct {
     Op optype;
