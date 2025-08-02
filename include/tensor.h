@@ -32,6 +32,9 @@ typedef struct {
     struct Tensor* grad;
 } Tensor;
 
+// NTS: const so we compiler would yell at us if we accidentally change the input tensor
+size_t total_elems(const Tensor* tensor);
+
 #ifdef __cplusplus
 }
 #endif

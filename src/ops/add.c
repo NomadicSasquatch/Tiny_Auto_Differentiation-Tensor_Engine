@@ -1,22 +1,25 @@
 #include "op.h"
 #include "tensor.h"
 
-static void add_fwd(Node* n) {
-    Tensor* A = n->inputs[0]->out;
-    Tensor* B = n->inputs[1]->out;
-    Tensor* C = n->out;
+#include <stddef.h>
 
-    for(size_t i = 0, ne = total_elems(C); i < ne; ++i) {
+static void add_fwd(Node* node) {
+    Tensor* A = node->inputs[0]->out;
+    Tensor* B = node->inputs[1]->out;
+    Tensor* C = node->out;
+    size_t number_elements = total_elems(C);
+
+    for(size_t i = 0; i < number_elements; i++) {
         C->data[i] = A->data[i] + B->data[i];
     }
 }
 
-static void add_bwd(Node* n) {
-    Tensor* g = n->out->grad;
-    memcpy(n->inputs[0]->out->grad->data, g->data,
-           sizeof(float) * total_elems(g));
-    memcpy(n->inputs[1]->out->grad->data, g->data,
-           sizeof(float) * total_elems(g));
+static void add_bwd(Node* node) {
+    Tensor* tensor = node->out->grad;
+    size_t number_elements = total_elems(tensor);
+    
+    memcpy(node->inputs[0]->out->grad->data, tensor->data, sizeof(float) * number_elements);
+    memcpy(node->inputs[1]->out->grad->data, tensor->data, sizeof(float) * number_elements);
 }
 
 static const OpKernel add_kernel = {
