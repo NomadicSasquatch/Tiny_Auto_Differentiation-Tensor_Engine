@@ -19,14 +19,6 @@
 extern "C" {
 #endif  
 
-// defining logic to break out of program and debug
-#define fatal(format, ...)                       \
-    do {                                         \
-        fprintf(stderr, "Fatal: " format "\n",   \
-                ##__VA_ARGS__);                  \
-        exit(EXIT_FAILURE);                      \
-    } while(0)
-
 // atomic int to prevent race conditions
 // we will be using toposort - topo_index for index in topo order, parents is the atomic counter for Kahn's algo
 typedef struct {

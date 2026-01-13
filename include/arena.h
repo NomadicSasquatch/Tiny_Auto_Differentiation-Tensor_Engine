@@ -1,6 +1,8 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include "utils.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,17 +16,18 @@
 extern "C" {
 #endif
 
-// defining logic to break out of program and debug
-#define fatal(format, ...)                       \
-    do {                                         \
-        fprintf(stderr, "Fatal: " format "\n",   \
-                ##__VA_ARGS__);                  \
-        exit(EXIT_FAILURE);                      \
-    } while(0)
-
-// round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof()
-#define ALIGN_UP(p, a)                           \
-        (void*)((((uintptr_t)(p) + ((a)-1)) & ~((uintptr_t)((a)-1))))
+#ifndef MAP_ANONYMOUS
+#  ifdef __linux__
+#    include <asm-generic/mman-common.h>
+#  endif
+#endif
+#ifndef MAP_ANONYMOUS
+#  ifdef MAP_ANON
+#    define MAP_ANONYMOUS MAP_ANON
+#  else
+#    error "MAP_ANONYMOUS is not available on this platform"
+#  endif
+#endif
 
 // memory arena struct for fast allocation and resets
 typedef struct {
@@ -54,7 +57,7 @@ static inline void arena_init(Arena* arena, size_t bytes) {
 
     void* ptr = mmap(NULL, bytes, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 
-    if(ptr == NULL) {
+    if(ptr == MAP_FAILED) {
         fatal("mmap: %s", strerror(errno));
     }
 

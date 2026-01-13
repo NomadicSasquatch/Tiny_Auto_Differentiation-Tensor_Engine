@@ -14,17 +14,9 @@
 extern "C" {
 #endif  
 
-// defining logic to break out of program and debug
-#define fatal(format, ...)                       \
-    do {                                         \
-        fprintf(stderr, "Fatal: " format "\n",   \
-                ##__VA_ARGS__);                  \
-        exit(EXIT_FAILURE);                      \
-    } while(0)
-
 // tensor struct, grad for easier (lazier) backpropagation
 // data is all stored within our arena
-typedef struct {
+typedef struct Tensor {
     float* data;
     int64_t shape[6];
     int64_t stride[6];
