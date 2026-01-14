@@ -10,3 +10,10 @@ static void matmul_fwd(Node* node) {
 
     size_t number_elements = total_elems(C);
 }
+
+static const OpKernel add_kernel = {
+    .op_type = OP_MATMUL,
+    .name = "mat_mul",
+    .forward = matmul_fwd,
+    .backward = matmul_bwd,
+};

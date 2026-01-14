@@ -7,12 +7,9 @@
 #include <string.h>
 
 // defining logic to break out of program and debug
-#define fatal(format, ...)                       \
-    do {                                         \
-        fprintf(stderr, "Fatal: " format "\n",   \
-                ##__VA_ARGS__);                  \
-        exit(EXIT_FAILURE);                      \
-    } while(0)
+// Using a function avoids -Wpedantic warnings for empty __VA_ARGS__ cases.
+void fatalf(const char* line, int line, const char* format, ...);
+#define fatal(...) fatalf(__FILE__, __LINE__, __VA_ARGS__)
 
 // round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof()
 #define ALIGN_UP(p, a)                           \

@@ -5,7 +5,7 @@ static const OpKernel* registry[MAX_OPS];
 static int registry_idx = 0;
 
 void register_opkernel(const OpKernel* kernel) {
-    if(kernel->optype >= MAX_OPS) {
+    if(kernel->optype < 0 || kernel->optype >= MAX_OPS) {
         fatal("Registry is full!");
     }
     registry[kernel->optype] = kernel;

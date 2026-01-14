@@ -29,9 +29,9 @@ static void mul_bwd(Node* node) {
 
 static const OpKernel mul_kernel = {
     .op_type = OP_MUL,
-    .name    = "mul",
-    .fwd     = mul_fwd,
-    .bwd     = mul_bwd,
+    .name = "mul",
+    .forward = mul_fwd,
+    .backward = mul_bwd,
 };
 
 __attribute__((constructor))

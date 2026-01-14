@@ -14,7 +14,7 @@
 extern "C" {
 #endif  
 
-// tensor struct, grad for easier (lazier) backpropagation
+// tensor struct, grad for easier (lazier) backpropagation, another tensor with the same shape
 // data is all stored within our arena
 typedef struct Tensor {
     float* data;

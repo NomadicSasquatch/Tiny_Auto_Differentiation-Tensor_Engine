@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "tinyengine.h"
 
+struct Node;
 // Typedef but with a function pointer, for us to use in our OpKernel, to call the actual operations easier
 // Format: typedef {return_type} (*{function_name})({parameter_list});
 typedef void (*OpForward)(Node*);
@@ -13,6 +13,7 @@ typedef enum { OP_ADD, OP_MUL, OP_MATMUL, OP_RELU, OP_SOFTMAX } Op;
 
 typedef struct {
     Op optype;
+    const char* name;
     OpForward forward;
     OpBackward backward;
 } OpKernel;

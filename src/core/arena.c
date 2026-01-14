@@ -1,4 +1,5 @@
 #include "tinyengine.h"
+#include "arena.h"
 
 void compute_rowmajor_strides(Tensor* tensor) {
     int64_t accumulate = 1
