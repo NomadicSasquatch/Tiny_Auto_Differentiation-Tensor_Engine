@@ -1,15 +1,6 @@
 #include "tinyengine.h"
 #include "arena.h"
 
-void compute_rowmajor_strides(Tensor* tensor) {
-    int64_t accumulate = 1
-
-    for(int i = tensor->ndim - 1; i >= 0; i--) {
-        tensor->stride[i] = accumulate;
-        accumulate *= tensor->shape[i];
-    }
-}
-
 Tensor* tensor_new(Arena* arena, int ndim, const int64_t* shape) {
     Tensor* ret_tensor = arena_alloc(arena, sizeof(Tensor), alignof(Tensor));
     ret_tensor->ndim = ndim;

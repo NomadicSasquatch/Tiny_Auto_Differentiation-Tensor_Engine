@@ -1,6 +1,10 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "op.h"
+#include "tensor.h"
+#include "arena.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -24,20 +28,26 @@ extern "C" {
 typedef struct {
     Op operation;
     Tensor* out;
-    struct Node* inputs[3];
+    struct Node** inputs;
     int n_input;
+
+    // Meta data for possible toposort
     int topo_index;
     atomic_int pending_parents;
     // add children?
 } Node;
 
 typedef struct {
+    Arena* arena;
     Node** nodes;
     size_t size;
     size_t capacity;
 } Graph;
 
-void graph_init(Graph *g);
+void graph_init(Graph *g, Arena* arena);
+void graph_free(Graph* g);
+// leaf or input node, to wrap an existing tensor as the input node
+Node* graph_add_input(Graph* g, Tensor* t);
 Tensor* add_node(Graph *g, Op op, int n_in, Node **inputs);
 void topo_sort(Graph *g, Node ***out_order, size_t *out_n);
 void forward(Graph *g, Node **order, size_t n);

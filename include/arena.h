@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 // memory arena struct for fast allocation and resets
-typedef struct {
+typedef struct Arena {
     uint8_t* base;
     uint8_t* curr;
     uint8_t* end;
