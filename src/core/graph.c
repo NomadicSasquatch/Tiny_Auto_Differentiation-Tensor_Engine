@@ -219,8 +219,27 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
     *total_outputs = total_nodes;
 }
 
-void forward() {
+void forward(Graph* graph, Node** order, size_t order_size) {
+    for(size_t i = 0; i < order_size; i++) {
+        Node* curr_node = order[i];
+        if(curr_node->operation == OP_INPUT) {
+            break;
+        }
 
+        Opkernel* curr_opp = get_opkernel(curr_node->operation);
+        if(curr_opp < 0) {
+            fatal("forward pass cannot run: operator is not found in registry, operator id:%d", (int) curr_opp);
+        }
+
+        curr_opp->forward(curr_node);
+    }
+}
+
+// Make sure that there is something to propagate
+static void ensure_grad(Graph* graph, Tensor* tensor) {
+    if(!t->grad) {
+        t->grad = tensor_zeroes_like(graph->arena, tensor);
+    }
 }
 
 void calc_grad() {

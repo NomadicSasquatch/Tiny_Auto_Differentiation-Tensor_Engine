@@ -12,5 +12,7 @@ void register_opkernel(const OpKernel* kernel) {
 }
 
 const OpKernel* get_opkernel(Op optype) {
+    if(optype < 0 || optype >= MAX_OPS) return NULL;
+    
     return registry[optype];
 }
