@@ -156,6 +156,7 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
     }
 
     size_t total_nodes = graph->size;
+    size_t order_idx = 0;
     Node** order = (Node*) malloc(total_nodes * sizeof(Node*));
     
     if(!queue) {
@@ -174,6 +175,7 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
     if(!queue) {
         fatal("topological sort cannot run: queue malloc failed");
     }
+
     for(size_t i = 0; i < total_nodes; i++) {
         graph->nodes[i]->topo_index = (int) i;
 
@@ -181,6 +183,40 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
         in_degree[i] = tmp_node->n_inputs;
     }
 
+    for(size_t i = 0; i < total_nodes; i++) {
+        if(in_degree[i] == 0) {
+            queue[tail++] = i;
+        }
+    }
+
+    while(head < tail) {
+        size_t src = queue[head++];
+        Node* src_node = graph->nodes[src];
+        order[order_idx++] = src_node;
+
+        for(size_t i = 0; i < total_nodes; i++) {
+            Node* dst_node = graph->nodes[i];
+            for(int j = 0; j < dst_node->n_inputs; j++) {
+                if(dst_node->inputs[j] == src_node) {
+                    if(--in_degree[i] == 0) {
+                        queue[tail++] = i;
+                    }   
+                    // break;
+                }
+            }
+        }
+    }
+
+    free(queue);
+    free(in_degree);
+
+    if(order_idx != total_nodes) {
+        free(order);
+        fatal("topological sort cannot run: graph has a cycle or disconnected nodes");
+    }
+
+    *output_order = order;
+    *total_outputs = total_nodes;
 }
 
 void forward() {
