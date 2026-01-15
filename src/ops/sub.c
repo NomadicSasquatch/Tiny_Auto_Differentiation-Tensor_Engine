@@ -9,9 +9,9 @@ static void sub_fwd(Node* node) {
     Tensor* A = node->inputs[0]->out;
     Tensor* B = node->inputs[1]->out;
     Tensor* C = node->out;
+    size_t number_elements = total_elems(C);
 
-    size_t n = total_elems(C);
-    for(size_t i = 0; i < n; i++) {
+    for(size_t i = 0; i < number_elements; i++) {
         C->data[i] = A->data[i] - B->data[i];
     }
 }
@@ -20,9 +20,9 @@ static void sub_bwd(Node* node) {
     Tensor* gA = node->inputs[0]->out->grad;
     Tensor* gB = node->inputs[1]->out->grad;
     Tensor* gC = node->out->grad;
+    size_t number_elements = total_elems(gC);
 
-    size_t n = total_elems(gC);
-    for(size_t i = 0; i < n; i++) {
+    for(size_t i = 0; i < number_elements; i++) {
         gA->data[i] += gC->data[i];
         gB->data[i] -= gC->data[i];
     }

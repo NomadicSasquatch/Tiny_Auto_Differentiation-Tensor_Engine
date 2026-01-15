@@ -14,6 +14,7 @@ static void mul_fwd(Node* node) {
     }
 }
 
+// multi pathway is considered since the gradient is accumulated by the partial adjoints of the inputs wrt the outputs
 static void mul_bwd(Node* node) {
     Tensor* A  = node->inputs[0]->out;
     Tensor* B  = node->inputs[1]->out;
