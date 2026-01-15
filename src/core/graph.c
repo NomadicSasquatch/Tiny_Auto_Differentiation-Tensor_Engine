@@ -148,6 +148,7 @@ Tensor* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
     return output_node->out;
 }
 
+// can consider to sort the order within the graph and not have another allocated space
 void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) {
     if(!graph || !output_order || !total_outputs) {
         printf("topological sort error: one of the inputs is NULL");
@@ -219,7 +220,8 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
     *total_outputs = total_nodes;
 }
 
-void forward(Graph* graph, Node** order, size_t order_size) {
+// consider sorted graph order
+void graph_forward_pass(Graph* graph, Node** order, size_t order_size) {
     for(size_t i = 0; i < order_size; i++) {
         Node* curr_node = order[i];
         if(curr_node->operation == OP_INPUT) {
@@ -242,6 +244,44 @@ static void ensure_grad(Graph* graph, Tensor* tensor) {
     }
 }
 
-void calc_grad() {
+// Consider sorted graph order
+// Loss param is the output loss scalar
+void graph_backward_pass(Graph* graph, Nodes** order, size_t order_size, Tensor* loss) {
+    if(!graph || !order || !loss) {
+        fatal("graph_backward_pass cannot run: input is NULL");
+    }
+
+    ensure_grad(graph, loss);
+    size_t loss_elems = total_elems(loss);
+
+    if(loss_elems != 1) {
+        fatal("graph_backward_pass cannot run: loss must be a scalar / 1 dimension, loss has %d elements", loss_elems);
+    }
+    // training should already assign the loss value, for testing/toy examples
+    // loss->grad->data[0] = 1.0f;
+
+    for(size_t i = order_size - 1; i >= 0; i--) {
+        Node* node = order[i];
+
+        if(node->operation == OP_INPUT) {
+            break;
+        }
+
+        ensure_grad(graph, node->out);
+        // Again, this loop considers the possibility that there are more than one inputs per node, but now everything is hard coded to 2 inputs, since fused kernels are not considered
+        for(int j = 0; j < node->n_input; j++) {
+            ensure_grad(graph, node->inputs[i]->out);
+        }
+
+        const Opkernel* curr_opp = get_opkernel(node->operation);
+        if(!curr_opp) {
+            fatal("graph_backward_pass cannot run: op is out of bounds/not registered, op index: %d", (int) node->operation);
+        }
+        if(!curr_opp->backward) {
+            fatal("graph_backward_pass cannot run: op backpropagation is missing, op index: %d", (int) node->operation);
+        }
+
+        curr_opp->backward;
+    }
 
 }

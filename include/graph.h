@@ -25,6 +25,7 @@ extern "C" {
 
 // atomic int to prevent race conditions
 // we will be using toposort - topo_index for index in topo order, parents is the atomic counter for Kahn's algo
+// NTS: The node struct allows for multiple inputs, but the code for the operators tentatively are hard coded to 2 inputs. If more inputs are permitted I think it would only be in the context of fused kernels, but have to write out the backwards as well and change the main loops for the basic forward and backward as well
 typedef struct {
     Op operation;
     Tensor* out;
@@ -34,7 +35,7 @@ typedef struct {
     // Meta data for possible toposort
     int topo_index;
     atomic_int pending_parents;
-    // add children?
+    // Add children?
 } Node;
 
 typedef struct {
@@ -46,7 +47,7 @@ typedef struct {
 
 void graph_init(Graph *g, Arena* arena);
 void graph_free(Graph* g);
-// leaf or input node, to wrap an existing tensor as the input node
+// Leaf or input node, to wrap an existing tensor as the input node
 Node* graph_add_input(Graph* g, Tensor* t);
 Tensor* add_node(Graph *g, Op op, int n_in, Node **inputs);
 void topo_sort(Graph *g, Node ***out_order, size_t *out_n);
