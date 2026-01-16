@@ -11,7 +11,7 @@
 void fatalf(const char* file, int line, const char* format, ...);
 #define fatal(...) fatalf(__FILE__, __LINE__, __VA_ARGS__)
 
-// round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof()
+// round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof() (for power of two expectation)
 #define ALIGN_UP(p, a)                           \
         (void*)((((uintptr_t)(p) + ((a)-1)) & ~((uintptr_t)((a)-1))))
 

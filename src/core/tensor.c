@@ -41,10 +41,10 @@ size_t total_elems(const Tensor* tensor) {
 
 Tensor* tensor_new(Arena* arena, int ndim, const uint64_t* shape) {
     if(!arena) {
-        fatal("tensor_new cannot run: arena is NULL");
+        fatal_("tensor_new cannot run: arena is NULL");
     }
     if(ndim < 0 || ndim > 6) {
-        fatal("tensor_new cannot run: tensor ndim is out of range %d < 0 || %d > 6", ndim, ndim);
+        fatal_("tensor_new cannot run: tensor ndim is out of range %d < 0 || %d > 6", ndim, ndim);
     }
 
     Tensor* tensor = (Tensor*) arena_alloc(arena, sizeof(Tensor), alignof(Tensor));
