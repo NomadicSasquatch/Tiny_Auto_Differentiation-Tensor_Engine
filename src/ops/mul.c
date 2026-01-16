@@ -1,5 +1,7 @@
 #include "op.h"
+#include "graph.h"
 #include "tensor.h"
+#include "utils.h"
 
 #include <stddef.h>
 
@@ -29,7 +31,7 @@ static void mul_bwd(Node* node) {
 }
 
 static const OpKernel mul_kernel = {
-    .op_type = OP_MUL,
+    .optype = OP_MUL,
     .name = "mul",
     .forward = mul_fwd,
     .backward = mul_bwd,

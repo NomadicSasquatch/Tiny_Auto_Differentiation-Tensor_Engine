@@ -1,5 +1,7 @@
 #include "op.h"
+#include "graph.h"
 #include "tensor.h"
+#include "utils.h"
 
 #include <stddef.h>
 
@@ -88,7 +90,7 @@ static void matmul_bwd(Node* node) {
 }
 
 static const OpKernel mat_mul_kernel = {
-    .op_type = OP_MATMUL,
+    .optype = OP_MATMUL,
     .name = "mat_mul",
     .forward = matmul_fwd,
     .backward = matmul_bwd,

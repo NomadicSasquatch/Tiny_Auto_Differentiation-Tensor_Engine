@@ -26,7 +26,7 @@ extern "C" {
 // atomic int to prevent race conditions
 // we will be using toposort - topo_index for index in topo order, parents is the atomic counter for Kahn's algo
 // NTS: The node struct allows for multiple inputs, but the code for the operators tentatively are hard coded to 2 inputs. If more inputs are permitted I think it would only be in the context of fused kernels, but have to write out the backwards as well and change the main loops for the basic forward and backward as well
-typedef struct {
+typedef struct Node {
     Op operation;
     Tensor* out;
     struct Node** inputs;

@@ -1,6 +1,7 @@
 #include "op.h"
-#include "tensor.h"
 #include "graph.h"
+#include "tensor.h"
+#include "utils.h"
 
 #include <stddef.h>
 
@@ -28,7 +29,7 @@ static void add_bwd(Node* node) {
 }
 
 static const OpKernel add_kernel = {
-    .op_type = OP_ADD,
+    .optype = OP_ADD,
     .name = "add",
     .forward = add_fwd,
     .backward = add_bwd,
