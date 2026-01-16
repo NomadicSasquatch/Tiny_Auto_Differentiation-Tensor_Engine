@@ -15,6 +15,7 @@
 void compute_rowmajor_strides(Tensor* tensor) {
     int64_t accumulate = 1;
 
+    // Linear memory layout, last dim always increments by 1
     for(int i = tensor->ndim - 1; i >= 0; i--) {
         tensor->stride[i] = accumulate;
         accumulate *= tensor->shape[i];
