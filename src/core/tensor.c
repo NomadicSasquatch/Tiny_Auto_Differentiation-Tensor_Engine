@@ -19,6 +19,11 @@ void compute_rowmajor_strides(Tensor* tensor) {
         tensor->stride[i] = accumulate;
         accumulate *= tensor->shape[i];
     }
+    // Hardcoded 6 since the dimension limit of tensors as declared in the header file is 6.
+    for(int i = tensor->ndim; i < 6; i++) {
+        tensor->stride[i] = 0;
+        tensor->shape[i] = 0;
+    }
 }
 
 size_t total_elems(const Tensor* tensor) {
