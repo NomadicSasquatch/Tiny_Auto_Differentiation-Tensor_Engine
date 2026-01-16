@@ -1,6 +1,8 @@
 #include "tinyengine.h"
 #include "arena.h"
 
+#include <stdalign.h>
+
 Tensor* tensor_new(Arena* arena, int ndim, const int64_t* shape) {
     Tensor* ret_tensor = arena_alloc(arena, sizeof(Tensor), alignof(Tensor));
     ret_tensor->ndim = ndim;

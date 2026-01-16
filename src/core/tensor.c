@@ -10,9 +10,10 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <assert.h>
+#include <stdalign.h>
 
 void compute_rowmajor_strides(Tensor* tensor) {
-    int64_t accumulate = 1
+    int64_t accumulate = 1;
 
     for(int i = tensor->ndim - 1; i >= 0; i--) {
         tensor->stride[i] = accumulate;
@@ -41,10 +42,10 @@ size_t total_elems(const Tensor* tensor) {
 
 Tensor* tensor_new(Arena* arena, int ndim, const uint64_t* shape) {
     if(!arena) {
-        fatal_("tensor_new cannot run: arena is NULL");
+        fatal("tensor_new cannot run: arena is NULL");
     }
     if(ndim < 0 || ndim > 6) {
-        fatal_("tensor_new cannot run: tensor ndim is out of range %d < 0 || %d > 6", ndim, ndim);
+        fatal("tensor_new cannot run: tensor ndim is out of range %d < 0 || %d > 6", ndim, ndim);
     }
 
     Tensor* tensor = (Tensor*) arena_alloc(arena, sizeof(Tensor), alignof(Tensor));
@@ -85,5 +86,5 @@ Tensor* tensor_zeroes_like(Arena* arena, const Tensor* like) {
     Tensor* new_tensor = tensor_new(arena, like->ndim, like->shape);
     tensor_fill(new_tensor, 0.0f);
 
-    return new_tensor
+    return new_tensor;
 }
