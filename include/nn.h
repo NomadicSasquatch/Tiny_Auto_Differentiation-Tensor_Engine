@@ -4,6 +4,7 @@
 #include "tensor.h"
 #include "arena.h"
 #include "graph.h"
+#include "utils.h"
 
 #ifdef __cplusplus
 extern "C" {
