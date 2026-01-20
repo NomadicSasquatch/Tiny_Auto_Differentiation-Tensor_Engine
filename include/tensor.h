@@ -1,6 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
+#include "arena.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
