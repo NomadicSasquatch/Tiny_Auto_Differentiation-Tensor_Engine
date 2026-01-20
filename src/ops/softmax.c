@@ -108,7 +108,6 @@ static void softmax_bwd(Node* node) {
             size_t idx = (size_t) (b * c_stride_b + d * c_stride_d);
             gA->data[idx] += C->data[idx] * (gC->data[idx] - dot);
         }
-
     }
 }
 

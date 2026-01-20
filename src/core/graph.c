@@ -202,7 +202,7 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
                     if(--in_degree[i] == 0) {
                         queue[tail++] = i;
                     }   
-                    // break;
+                    break;
                 }
             }
         }
