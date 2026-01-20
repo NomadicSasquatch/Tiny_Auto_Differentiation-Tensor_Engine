@@ -1,6 +1,73 @@
 #include "nn.h"
 
-static void weight_init_matrix(Tensor* tensor, InitScheme init_scheme) {
+/*XORShift is just a fast (but weak) PRNG that is a subset of LFSRs. Deterministic and not truly random,. 
+  Returns a 32 bit int */
+static uint32_t xorshift32(uint32_t* state) {
+    uint32_t x = *state;
+
+    // Avoiding 0 edgecase (all 0s still after shift)
+    if(x == 0) {
+        x = 0x12345678u;
+    }
+
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    *state = x;
+
+    return x;
+}
+
+static float rand_uniform01(uint32_t* state) {
+    uint32_t tmp = xorshift32(state);
+
+    // Normalise to [0,1), instead of [0,1] by dividing by (float) UINT32_MAX to avoid edgecases
+    return (float)tmp * (1.0f / 4294967296.0f);
+}
+
+// Returns random float in [low,high], for kaiming
+static float rand_uniform(uint32_t* state, float low, float high) {
+    return low + (high - low) * rand_uniform01(state);
+}
+
+/* Generates a float sampled from a Gaussian distribution of X ~ N(mean, std^2), using
+   box muller transform*/
+/* Summary for box muller transform:
+    -> Transforms two independent numbers sampled from uniform distribution U1, U2 ~ Uniform(0,1) to
+        two independent numbers from a standard normal random numbres Z1, Z2 ~ N(0,1)
+    -> Picking a random point (x, y) from a 2D Gaussian centered at the origin, the angle around the origin
+        is uniform(no direction is preferred) and the distance from the origin is not uniform (most points
+        cluster around the center)
+    -> Therfore we can generate a Gaussian point by generating a random angle _theta_, random radius _r_ and
+        convert the from polar to cartesian where x = _r_cos(_theta_) and y = _r_sin(_theta_)
+    -> Box mullers job is to pick the correct radius distribution and pick a uniform angle
+    -> _theta_ must be uniform on (0, 2*pi), so if U2 ~ Uniform(0,1), then _theta_ = 2 * pi * U2
+    -> Raidus was obtained by solving from the conversion of uniform distribution to Rayleigh using inverse
+        CDF 
+    -> Convert to cartesian from polar
+    -> Distribution is normal, since the geometry of a 2D Gaussian is recreated, with the angle uniform
+        from 2 * pi * U2 and radius having rayleigh distribution from sqrt(-2ln(U1))
+    -> We can then convert this standard normal to any normal with mean mu and std sigma */
+    
+static float rand_normal(uint32_t* state, float mean, float std) {
+    float u1 = rand_uniform01(state);
+    float u2 = rand_uniform01(state);
+
+    // To avoid log(0)
+    if(u1 < 1e-12f){
+        u1 = 1e-12f;
+    }
+
+    float r = sqrtf(-2.0f * logf(u1));
+    // 2 * pi
+    float theta = 2.0f * 3.14159265358979323846f * u2;
+    float z = r * cosf(theta);
+
+    return mean + std * z;
+}
+
+// rng for random init
+static void weight_init_matrix(Tensor* tensor, InitScheme init_scheme, uint32_t* rng) {
     if(!tensor) {
         printf("weight_init_matrix failed, tensor is NULL");
         return;
@@ -12,16 +79,40 @@ static void weight_init_matrix(Tensor* tensor, InitScheme init_scheme) {
     size_t number_elements = total_elems(tensor);
 
     if(init_scheme == INIT_XAVIER_UNIFORM) {
+        float a = sqrtf(6.0f / (float) (fan_in + fan_out));
 
+        for(size_t i = 0; i < number_elements; i++) {
+            tensor->data[i] = rand_uniform(rng, -a, a);
+        }
+
+        return;
     }
     else if(init_scheme == INIT_XAVIER_NORMAL) {
+        float std = sqrt(2.0f / (float) (fan_in + fan_out));
 
+        for(size_t i = 0; i < number_elements; i++) {
+            tensor->data[i] = rand_normal(rng, 0.0f, std);
+        }
+
+        return;
     }
     else if(init_scheme == INIT_HE_UNIFORM) {
+        float a = sqrtf(6.0f / (float)(fan_in));
 
+        for(size_t i = 0; i < number_elements; i++) {
+            tensor->data[i] = rand_uniform(rng, -a, a);
+        }
+
+        return;
     }
     else if(init_scheme == INIT_HE_NORMAL) {
+        float std = sqrtf(2.0f / (float)(fan_in));
 
+        for(size_t i = 0; i < number_elements; i++) {
+            tensor->data[i] = rand_normal(rng, 0.0f, std);
+        }
+
+        return;
     }
     else {
         fatal("weight_init_matrix failed, unknown init_scheme %d", (int) init_scheme);
@@ -37,7 +128,7 @@ static void init_bias(Tensor* tensor) {
     tensor_fill(tensor, 0.0f);   
 }
 
-static void linear_init(Linear* layer, Arena* param_arena, int in_features, int out_features, InitScheme init_scheme, uint32_t* rng) {
+static void linear_init(Linear* layer, Arena* param_arena, size_t in_features, size_t out_features, InitScheme init_scheme, uint32_t* rng) {
     if(!layer || !param_arena) {
         prinf("layer_init failed, layer or param_arena is NULL");
         return;
@@ -55,8 +146,12 @@ static void linear_init(Linear* layer, Arena* param_arena, int in_features, int 
     layer->weight->grad = tensor_zeroes_like(param_arena, layer->weight);
     layer->bias->grad = tensor_zeroes_like(param_arena, layer->bias);
 
+    weight_init_matrix(layer->weight, init_scheme, rng);
+    init_bias(layer->bias);
 
+    // Sanity check to zero gradients and bias? Doubt its needed for now, zeroed in tensor_zeroes_like
 }
+
 void init_mlp(MLP* nn, 
             Arena* param_arena,
             int num_layers, 

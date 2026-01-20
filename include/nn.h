@@ -6,6 +6,8 @@
 #include "graph.h"
 #include "utils.h"
 
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
