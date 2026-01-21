@@ -269,6 +269,4 @@ void mlp_free(MLP* nn) {
     free(nn->layers);
     nn->layers = NULL;
     nn->layers = 0;
-    // Check this
-    free(nn);
 }
