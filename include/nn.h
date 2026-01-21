@@ -37,7 +37,7 @@ typedef struct Linear {
 typedef struct MLP {
     int num_layers;
     Linear* layers;
-    Activation activation;
+    Activation hidden_activation;
 } MLP;
 
 // Fully connected always

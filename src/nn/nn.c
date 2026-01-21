@@ -1,4 +1,5 @@
 #include "nn.h"
+#include "optim.h"
 
 /*XORShift is just a fast (but weak) PRNG that is a subset of LFSRs. Deterministic and not truly random,. 
   Returns a 32 bit int */
@@ -162,7 +163,37 @@ void init_mlp(MLP* nn,
             InitScheme hidden_init, 
             InitScheme output_init, 
             unsigned* rng_state) {
+                if(!nn || ! param_arena) {
+                    fatal("init_mlp cannot run: nn or param_arena is NULL");
+                }
+                if(num_layers < 1) {
+                    fatal("init_mlp cannot run: num_layers must be >= 1, curr num_layers = %d", num_layers);
+                }
+                if(hidden_dim < 1) {
+                    fatal("init_mlp cannot run: hidden_dim must be >= 1, curr hidden_dim = %d", hidden_dim);
+                }
 
+                nn->num_layers = num_layers;
+                nn->hidden_activation = hidden_activation;
+                // Arena?
+                nn->layers = (Linear*) malloc((size_t) num_layers * sizeof(Linear));
+
+                if(num_layers == 1) {
+                    linear_init(nn->layers, param_arena, input_dim, output_dim, output_init, rng_state);
+
+                    return;
+                }
+
+                linear_init(&nn->layers[0], param_arena, input_dim, hidden_dim, hidden_init, rng_state);
+
+                for(int i = 1; i < num_layers - 1; i++) {
+                    linear_init(&nn->layers[i], param_arena, hidden_dim, hidden_dim, hidden_init, rng_state);
+                }
+
+                linear_init(&nn->layers[num_layers-1], param_arena, hidden_dim, output_dim, output_init, rng_state);
+
+                return;
             }
+
 void mlp_forward(Graph* graph, Node* input, const MLP* nn);
 void mlp_free(MLP* nn);
