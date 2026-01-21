@@ -53,7 +53,7 @@ void init_mlp(MLP* nn,
             InitScheme hidden_init, 
             InitScheme output_init, 
             unsigned* rng_state);
-void mlp_forward(Graph* graph, Node* input, const MLP* nn);
+Node* mlp_forward(Graph* graph, Node* input, const MLP* nn);
 void mlp_free(MLP* nn);
 
 
