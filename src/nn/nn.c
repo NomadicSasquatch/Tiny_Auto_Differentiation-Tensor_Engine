@@ -262,5 +262,13 @@ Node* mlp_forward(Graph* graph, Node* input, const MLP* nn) {
 }
 
 void mlp_free(MLP* nn) {
+    if(!nn) {
+        return;
+    }
 
+    free(nn->layers);
+    nn->layers = NULL;
+    nn->layers = 0;
+    // Check this
+    free(nn);
 }
