@@ -195,7 +195,7 @@ void init_mlp(MLP* nn,
                 return;
             }
 
-Node* mlp_forward(Graph* graph, Node* input, const Linear* layer) {
+Node* layer_forward(Graph* graph, Node* input, const Linear* layer) {
     if(!graph || !input || !layer) {
         fatal("mlp_forward cannot run: graph or input or nn is NULL");
     }
@@ -214,5 +214,53 @@ Node* mlp_forward(Graph* graph, Node* input, const Linear* layer) {
     return a_node;
 }
 
+Node* apply_activation(Graph* graph, Activation activation, Node* input) {
+    if(activation == ACT_NONE) {
+        return input;
+    }
 
-void mlp_free(MLP* nn);
+    Node* act_input[1] = { input };
+    Op op_type;
+
+    if(activation == ACT_RELU) {
+        op_type = OP_RELU;
+    }
+    else if(activation == ACT_SIGMOID) {
+        op_type = OP_SIGMOID;
+    }
+    else if(activation == ACT_TANH) {
+        op_type = OP_TANH;
+    }
+    else if(activation == ACT_SOFTMAX) {
+        op_type = OP_SOFTMAX;
+    }
+    else {
+        fatal("forward activation cannot run: activation not recognised, activation index: %d", (int) activation);
+    }
+
+    Node* output = add_node(graph, op_type, 1, act_input);
+
+    return output;
+}
+
+Node* mlp_forward(Graph* graph, Node* input, const MLP* nn) {
+    if(!graph || !input || !nn) {
+        fatal("mlp_forward cannot run: graph or input or nn is NULL");
+    }
+
+    Node* head = input;
+
+    for(int i = 0; i < nn->num_layers - 1; i++) {
+        head = layer_forward(graph, head, &nn->layers[i]);
+        head = apply_activation(graph, nn->hidden_activation, head);
+    }
+
+    head = layer_forward(graph, head, &nn->layers[nn->num_layers-1]);
+
+    // Raw logits, final output activation yet to be applied
+    return head;
+}
+
+void mlp_free(MLP* nn) {
+
+}

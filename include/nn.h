@@ -24,7 +24,8 @@ typedef enum {
     ACT_NONE = 0,
     ACT_RELU,
     ACT_TANH,
-    ACT_SIGMOID
+    ACT_SIGMOID,
+    ACT_SOFTMAX,
 } Activation;
 
 // Abstracting layers for the AD and not the actual nn
