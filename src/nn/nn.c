@@ -195,5 +195,24 @@ void init_mlp(MLP* nn,
                 return;
             }
 
-void mlp_forward(Graph* graph, Node* input, const MLP* nn);
+Node* mlp_forward(Graph* graph, Node* input, const Linear* layer) {
+    if(!graph || !input || !layer) {
+        fatal("mlp_forward cannot run: graph or input or nn is NULL");
+    }
+
+    Tensor* weight = layer->weight;
+    Tensor* bias = layer->bias;
+
+    Node* w_node = graph_add_input(graph, weight);
+    Node* inputs_w[2] = { input, w_node };
+    Node* mm_node = add_node(graph, OP_MATMUL, 2, inputs_w);
+
+    Node* b_node = graph_add_input(graph, bias);
+    Node* inputs_b[2] = { mm_node, b_node };
+    Node* a_node = add_node(graph, OP_ADD, 2, inputs_b);
+
+    return a_node;
+}
+
+
 void mlp_free(MLP* nn);

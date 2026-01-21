@@ -116,7 +116,7 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
     return NULL;
 }
 
-Tensor* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
+Node* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
     if(!graph || !inputs) return NULL;
     if(n_inputs <= 0) fatal("add_node: n_inputs must be > 0");
     if(op == OP_INPUT) fatal("add_node: OP_INPUT is reserved for leaves");
@@ -145,7 +145,7 @@ Tensor* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
     atomic_init(&output_node->pending_parents, 0);
     graph->nodes[graph->size++] = output_node;
 
-    return output_node->out;
+    return output_node;
 }
 
 // can consider to sort the order within the graph and not have another allocated space

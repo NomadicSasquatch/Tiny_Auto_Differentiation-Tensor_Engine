@@ -5,6 +5,7 @@
 #include "arena.h"
 #include "graph.h"
 #include "utils.h"
+#include "op.h"
 
 #include <math.h>
 
