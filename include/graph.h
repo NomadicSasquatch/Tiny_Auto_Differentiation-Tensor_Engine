@@ -44,7 +44,10 @@ typedef struct {
     size_t size;
     size_t capacity;
 } Graph;
-
+git checkout -b feature/nn_wrapper
+git add .
+git commit -m "nn_wrapper branch init"
+git push -u origin feature/nn_wrapper
 void graph_init(Graph *g, Arena* arena);
 void graph_free(Graph* g);
 // Leaf or input node, to wrap an existing tensor as the input node
