@@ -18,6 +18,7 @@ void generate_dataset(Dataset* dataset, Arena* arena, int dims, int num_data_poi
         // We only take 2D for now
         if(dims != 2) {
             print("DATA_SPIRAL only allows for 2D plane!");
+            
             return;
         }
         // t_max (double) max parameter value (controls spiral length ie how many turns), take it as [2 pi, 4 pi] 
