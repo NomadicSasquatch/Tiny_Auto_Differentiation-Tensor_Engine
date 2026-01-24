@@ -37,6 +37,7 @@ typedef struct Linear {
     Tensor* bias;
 } Linear;
 
+// Perhaps should add more metadata, to update in model.h
 typedef struct MLP {
     int num_layers;
     Linear* layers;

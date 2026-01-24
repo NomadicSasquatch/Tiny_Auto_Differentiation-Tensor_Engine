@@ -3,6 +3,4 @@
 #include "arena.h"
 #include "tensor.h"
 #include "graph.h"
-#include "autodiff.h"
-#include "onnx.h"
 #include "utils.h"
