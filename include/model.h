@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include "nn.h"
+#include "dataset.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,8 @@
 
 void run_train(const MLP* nn);
 void run_inference(const MLP* nn);
+// see how
+// void run_eval(const MLP* nn, const Dataset* dataset);
 
 static void save_model(const char* file_path, const MLP* nn) {
     FILE* f = fopen(file_path, "wb");
@@ -69,7 +72,6 @@ static void load_model(const char* file_path, MLP* nn) {
     }
 
     fclose(f);
-
 }
 
 #endif

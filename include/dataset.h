@@ -3,6 +3,7 @@
 
 #include "utils.h"
 #include "probhelper.h"
+#include "arena.h"
 #include <stdlib.h>
 #include <stdalign.h>
 
@@ -16,7 +17,7 @@ typedef struct {
     int num_classes;
 } Dataset;
 
-void generate_dataset(Dataset* dataset, int num_data_points, int num_classes, DatasetShape shape);
+void generate_dataset(Dataset* dataset, Arena* arena, int num_data_points, int num_classes, DatasetShape shape);
 void free_dataset(Dataset* dataset);
 
 #endif
