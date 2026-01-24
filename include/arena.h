@@ -29,6 +29,10 @@ extern "C" {
 #  endif
 #endif
 
+/* One persistent arena, one scratch arena, one data arena. Persistent arena is for values that do not change per iteration/epoch like weights, biases, weight grad and bias grad. 
+Scratch arena stores intermediate activation tensors, current input and output tensors x and y, output loss tensor, intermediate tensors produced by ops. */
+ 
+
 // memory arena struct for fast allocation and resets
 typedef struct Arena {
     uint8_t* base;

@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "utils.h"
 #include "op.h"
+#include "probhelper.h"
 
 #include <math.h>
 
