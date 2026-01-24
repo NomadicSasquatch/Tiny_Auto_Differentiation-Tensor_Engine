@@ -34,6 +34,7 @@ static float parse_float(const char *s, const char *name) {
     return v;
 }
 
+// #var creates var as a string
 #define SET_INT(var) do { (var) = parse_int(optarg, #var); } while(0)
 #define SET_FLOAT(var) do { (var) = parse_float(optarg, #var); } while(0)
 
