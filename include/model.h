@@ -10,7 +10,7 @@
 void run_train(const MLP* nn);
 void run_inference(const MLP* nn);
 
-static void save_model(const char* file_path, MLP* nn) {
+static void save_model(const char* file_path, const MLP* nn) {
     FILE* f = fopen(file_path, "wb");
     if(!f) {
         fatal("save_model: failed to open %s", file_path);
@@ -42,13 +42,13 @@ static void save_model(const char* file_path, MLP* nn) {
     fclose(f);
 }
 
-static void load_model(const char* file_path, const MLP* nn) {
+static void load_model(const char* file_path, MLP* nn) {
     FILE* f = fopen(file_path, "rb");
     if(!f) {
         fatal("save_model: failed to open %s", file_path);
     }
 
-    // UPDATE THE METADATA READ/LOADED IF NOT UPDATED
+    // UPDATE THE METADATA READ/LOADED IF NOT UPDATED (better for aligment to the model)
     fread(&nn->num_layers, sizeof(int), 1, f);
 
     for(int l = 0; l < nn->num_layers; l++) {
