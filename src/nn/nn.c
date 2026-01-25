@@ -195,6 +195,13 @@ Node* mlp_forward(Graph* graph, Node* input, const MLP* nn) {
     return head;
 }
 
+static void mlp_zero_grads(MLP* nn) {
+    for(int l = 0; l < nn->num_layers; l++) {
+        tensor_zero_grad(nn->layers[l].weight);
+        tensor_zero_grad(nn->layers[l].bias);
+    }
+}
+
 void mlp_free(MLP* nn) {
     if(!nn) {
         return;

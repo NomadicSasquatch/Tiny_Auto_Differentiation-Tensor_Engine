@@ -110,6 +110,7 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
         
         return new_tensor(graph->arena, 2, output_shape);
     }
+    // TODO: add unary ops
 
     fatal("infer_and_alloc_output cannot run: OP type index (%d) is not supported", (int) op);
 

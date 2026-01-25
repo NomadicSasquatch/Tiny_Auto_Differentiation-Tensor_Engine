@@ -2,6 +2,8 @@
 #include "model.h"
 #include "dataset.h"
 #include "optim.h"
+#include "loss.h"
+#include "graph.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -224,8 +226,66 @@ int main(int argc, char* argv[]) {
                 }
 
                 Node* input_node = graph_add_input(&graph, tensor);
-            }
+                Node* output_node = mlp_forward(&graph, input_node, &nn);
+                Node* final_output = apply_activation(&graph, ACT_SOFTMAX, output_node);
 
+                Node** order = NULL;
+                size_t order_n = 0;
+                topo_sort(&graph, &order, &order_n);
+                forward(&graph, order, order_n);
+
+                // TODO: Fix dims for the probs output
+                float loss = cross_entropy(final_output->out->data, class_idx);
+                loss_sum += loss;
+
+                int pred = 0;
+
+                for(size_t i = 0; i < final_output->out->ndim; i++) {
+                    pred = final_output->out->data[pred] > final_output->out->data[i]? final_output->out->data[pred] : final_output->out->data[i];
+                }
+
+                if(pred == class_idx) {
+                    correct++;
+                }
+
+                ensure_grad(&scratch, output_node->out);
+
+                // TODO: Check
+                for(size_t i = 0; i < output_node->out->ndim; i++) {
+                    output_node->out->grad->data[i] = final_output->out->data[i] - (i == class_idx? 1.0f : 0.0f);
+                }
+
+                graph_backward_pass(&graph, order, order_n, output_node->out->grad);
+                // TODO: Implement per op, pseudo for now
+                // mlp_sgd_step(&nn, lr);
+
+                mlp_zero_grads(&nn);
+
+                free(order);
+                graph_free(&graph);
+            }
+        }
+        float avg_loss = loss_sum / (float) n_per_class;
+        float acc = (float)correct / (float) n_per_class;
+
+        if(epoch % 10 == 0 || epoch == 1 || epoch == training_epochs) {
+            printf("Epoch %4d | loss %.6f | acc %.3f\n", epoch, avg_loss, acc);
         }
     }
+
+    // TODO: Pseudo for now
+    // float final_acc = eval_accuracy(&nn, &dataset);
+    // printf("Final accuracy (train set): %.3f\n", final_acc);
+
+    save_model("spirals_model.bin", &nn);
+    printf("Saved model to spirals_model.bin\n");
+
+    mlp_free(&nn);
+    arena_free(&param_arena);
+    arena_free(&scratch);
+    free(shuffle_class_arr);
+    free(shuffle_dpoint_arr);
+    free_dataset(&dataset);
+
+    return 0;
 }
