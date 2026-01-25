@@ -67,3 +67,13 @@ void free_dataset(Dataset* dataset) {
     dataset->num_data_points = 0;
     // free arena
 }
+
+// Fisher-Yates shuffle, again like in pathfinder repo :^)
+void shuffle_indexes(int* shuffle_arr, int arr_size, uint32_t* rng) {
+    for(int i = arr_size - 1; i > 0; i--) {
+        int j = (int)(rand_uniform01(rng) * (float)(i + 1));
+        int tmp = shuffle_arr[i];
+        shuffle_arr[i] = shuffle_arr[j];
+        shuffle_arr[j] = tmp;
+    }
+}

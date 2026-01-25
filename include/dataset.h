@@ -17,7 +17,8 @@ typedef struct {
     int num_classes;
 } Dataset;
 
-void generate_dataset(Dataset* dataset, Arena* arena, int num_data_points, int num_classes, DatasetShape shape);
+void generate_dataset(Dataset* dataset, Arena* arena, int dims, int num_data_points, int num_classes, DatasetShape shape, uint32_t* state);
 void free_dataset(Dataset* dataset);
+void shuffle_indexes(int* shuffle_arr, int arr_size, uint32_t* rng);
 
 #endif
