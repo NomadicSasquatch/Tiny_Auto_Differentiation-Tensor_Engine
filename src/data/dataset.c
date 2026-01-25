@@ -3,10 +3,10 @@
 #include "arena.h"
 
 
-void generate_dataset(Dataset* dataset, Arena* arena, int dims, int num_data_points, int num_classes, DatasetShape shape, uint32_t* state) {
+void generate_dataset(Dataset* dataset, Arena* arena, int data_dims, int num_data_points, int num_classes, DatasetShape shape, uint32_t* state) {
     dataset->num_classes = num_classes;
     dataset->num_data_points = num_data_points;
-    dataset->class_dpoints = arena_alloc(arena, dims * sizeof(float) * num_classes * num_data_points, alignof(float));
+    dataset->class_dpoints = arena_alloc(arena, data_dims * sizeof(float) * num_classes * num_data_points, alignof(float));
 
     if(shape == DATA_XOR) {
 
@@ -16,7 +16,7 @@ void generate_dataset(Dataset* dataset, Arena* arena, int dims, int num_data_poi
     }
     else if(shape == DATA_SPIRAL) {
         // We only take 2D for now
-        if(dims != 2) {
+        if(data_dims != 2) {
             print("DATA_SPIRAL only allows for 2D plane!");
             
             return;
@@ -43,7 +43,7 @@ void generate_dataset(Dataset* dataset, Arena* arena, int dims, int num_data_poi
                 x += rand_normal(state, 0, 0.2);
                 y += rand_normal(state, 0, 0.2);
 
-                int tmp_idx = dims * (i * num_data_points + j);
+                int tmp_idx = data_dims * (i * num_data_points + j);
                 dataset->class_dpoints[tmp_idx] = x;
                 dataset->class_dpoints[tmp_idx + 1] = y;
             }

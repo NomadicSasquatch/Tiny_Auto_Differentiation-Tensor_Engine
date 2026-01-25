@@ -1,6 +1,7 @@
 #include "nn.h"
 #include "model.h"
 #include "dataset.h"
+#include "optim.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,16 +71,24 @@ int main(int argc, char* argv[]) {
     float noise_std = 0.03f;
 
     int num_layers = 10;
-    int input_dim = 2;
+    int input_dim = 2; // code now uses only the harcoded variant
     int width = 20;
     int output_dim = 2;
 
     int training_epochs = 100;
     float lr = 0.03f;
 
+    // Hardcoded for now
+    Activation hidden_activation = ACT_SOFTMAX;
+    InitScheme hidden_init = INIT_HE_NORMAL;
+    InitScheme output_init = INIT_HE_NORMAL;
+    int hard_coded_input_dim = 2;
+
+    // MOre of seed than rng
+    uint32_t rng = 12345;
+
     // TODO: registry for datasetshape, so user can flag into the right dataset shape (add flag);
     // Flags might blow up when we add more dataset shapes........ hmmm.....
-    uint32_t rng = 12345;
     const char help_menu = "\nUsage: %s [options/flags]\n"
                         "===================== Options/Flags =====================\n"
                         "-m                                Mute this error message\n"
@@ -144,5 +153,59 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    Arena param_arena;
+    // 1 mb
+    arena_init(&param_arena, 1 << 20);
     
+    // Scratch aren for each epoch
+    Arena scratch;
+    arena_init(&scratch, 1 << 20);
+
+    Arena data_arena;
+    Dataset dataset;
+    arena_init(&data_arena, 1 << 20);
+
+    // DatasetShape is hardcoded for now
+    generate_dataset(&dataset, &data_arena, hard_coded_input_dim, n_per_class, num_classes, DATA_SPIRAL, rng);
+    int* shuffle_arr = (int*) malloc((size_t) n_per_class * sizeof(int));
+
+    if(!shuffle_arr) {
+        fatal("malloc idx failed");
+    }
+    for(int i = 0; i < n_per_class; i++){
+        shuffle_arr[i] = i;
+    }
+
+
+    MLP nn;
+    init_mlp(&nn, &param_arena, num_layers, hard_coded_input_dim, width,
+        output_dim, hidden_activation, hidden_init, output_init, &rng);
+
+    for(int epoch = 1; epoch <= training_epochs; epoch++) {
+        shuffle_indexes(shuffle_arr, n_per_class, rng);
+
+        float loss_sum = 0.0f;
+        int correct = 0;
+
+        // BGD for now
+        for(int it = 0; it < n_per_class; it++) {
+            int idx = shuffle_arr[it];
+
+            arena_reset(&scratch);
+
+            Graph graph;
+            graph_init(&graph, &scratch);
+
+            int64_t input_shape[2] = { 1, hard_coded_input_dim };
+            Tensor* tensor = tensor_new(&scratch, 2, input_shape);
+            // Should add a fill data function that computes by stride accurately as well, hardcoded now
+            // int tmp_idx = hard_coded_input_dim * (idx * n_per_class + j);
+            // dataset->class_dpoints[tmp_idx] = x;
+            // dataset->class_dpoints[tmp_idx + 1] = y;
+            // tensor->data[0] = dataset.class_dpoints[2*n + 0];
+            // tensor->data[1] = dataset.class_dpoints[2*n + 1];
+
+            Node* xnode = graph_add_input(&graph, tensor);
+        }
+    }
 }

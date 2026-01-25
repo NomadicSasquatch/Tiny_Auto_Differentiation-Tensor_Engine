@@ -96,7 +96,7 @@ void init_mlp(MLP* nn,
             Activation hidden_activation,
             InitScheme hidden_init, 
             InitScheme output_init, 
-            unsigned* rng_state) {
+            uint32_t* rng_state) {
                 if(!nn || ! param_arena) {
                     fatal("init_mlp cannot run: nn or param_arena is NULL");
                 }
