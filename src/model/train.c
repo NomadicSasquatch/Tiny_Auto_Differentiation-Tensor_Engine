@@ -167,45 +167,64 @@ int main(int argc, char* argv[]) {
 
     // DatasetShape is hardcoded for now
     generate_dataset(&dataset, &data_arena, hard_coded_input_dim, n_per_class, num_classes, DATA_SPIRAL, rng);
-    int* shuffle_arr = (int*) malloc((size_t) n_per_class * sizeof(int));
+    int* shuffle_dpoint_arr = (int*) malloc((size_t) n_per_class * sizeof(int));
+    int* shuffle_class_arr = (int*) malloc((size_t) num_classes * sizeof(int));
 
-    if(!shuffle_arr) {
-        fatal("malloc idx failed");
+    if(!shuffle_dpoint_arr) {
+        fatal("malloc for shuffle_dpoint_arr failed");
     }
     for(int i = 0; i < n_per_class; i++){
-        shuffle_arr[i] = i;
+        shuffle_dpoint_arr[i] = i;
+    }
+    if(!shuffle_class_arr) {
+        fatal("malloc for shuffle_class_arr failed");
+    }
+    for(int i = 0; i < num_classes; i++) {
+        shuffle_class_arr[i] = i;
     }
 
 
     MLP nn;
+    // TODO: shouldnt be hardcodedinput dim for the input dim, its meant to be for the wdith
     init_mlp(&nn, &param_arena, num_layers, hard_coded_input_dim, width,
         output_dim, hidden_activation, hidden_init, output_init, &rng);
 
+    // add a shuffle for the class dimension, 
     for(int epoch = 1; epoch <= training_epochs; epoch++) {
-        shuffle_indexes(shuffle_arr, n_per_class, rng);
+        shuffle_indexes(shuffle_dpoint_arr, n_per_class, rng);
+        shuffle_indexes(shuffle_class_arr,  num_classes, rng);
 
         float loss_sum = 0.0f;
         int correct = 0;
 
         // BGD for now
+        // Not sure if this shuffling is sufficient, loop per data isntance outside then per class inside.
         for(int it = 0; it < n_per_class; it++) {
-            int idx = shuffle_arr[it];
+            int data_idx = shuffle_dpoint_arr[it];
 
-            arena_reset(&scratch);
+            for(int j = 0; j < num_classes; j++) {
+                int class_idx = shuffle_class_arr[j];
 
-            Graph graph;
-            graph_init(&graph, &scratch);
+                arena_reset(&scratch);
 
-            int64_t input_shape[2] = { 1, hard_coded_input_dim };
-            Tensor* tensor = tensor_new(&scratch, 2, input_shape);
-            // Should add a fill data function that computes by stride accurately as well, hardcoded now
-            // int tmp_idx = hard_coded_input_dim * (idx * n_per_class + j);
-            // dataset->class_dpoints[tmp_idx] = x;
-            // dataset->class_dpoints[tmp_idx + 1] = y;
-            // tensor->data[0] = dataset.class_dpoints[2*n + 0];
-            // tensor->data[1] = dataset.class_dpoints[2*n + 1];
+                Graph graph;
+                graph_init(&graph, &scratch);
 
-            Node* xnode = graph_add_input(&graph, tensor);
+                // Value 3 is hard_coded_input_dim + 1 for class index
+                int64_t input_shape[2] = { 1, 2 };
+                Tensor* tensor = tensor_new(&scratch, hard_coded_input_dim, input_shape);
+                size_t num_elements = total_elems(tensor);
+
+                // TODO: Pseudo rowmajor strides calc as well
+                size_t base_idx = n_per_class * (class_idx * num_classes + data_idx);
+
+                for(int k = 0; k < num_elements; k++) {
+                    tensor->data[k] = dataset.class_dpoints[base_idx + k];
+                }
+
+                Node* xnode = graph_add_input(&graph, tensor);
+            }
+
         }
     }
 }

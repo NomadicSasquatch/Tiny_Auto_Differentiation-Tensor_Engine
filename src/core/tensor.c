@@ -60,7 +60,7 @@ Tensor* tensor_new(Arena* arena, int ndim, const int64_t* shape) {
     tensor->ndim = ndim;
 
     if(ndim > 0) {
-        memcpy(tensor->shape, shape, (size_t)ndim * sizeof(int64_t));
+        memcpy(tensor->shape, shape, (size_t) ndim * sizeof(int64_t));
     }
 
     compute_rowmajor_strides(tensor);

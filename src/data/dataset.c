@@ -15,7 +15,7 @@ void generate_dataset(Dataset* dataset, Arena* arena, int data_dims, int num_dat
 
     }
     else if(shape == DATA_SPIRAL) {
-        // We only take 2D for now
+        // TODO: We only take 2D for now (3D 1 for class)? dims are [class x data_dims]
         if(data_dims != 2) {
             print("DATA_SPIRAL only allows for 2D plane!");
             
@@ -43,9 +43,12 @@ void generate_dataset(Dataset* dataset, Arena* arena, int data_dims, int num_dat
                 x += rand_normal(state, 0, 0.2);
                 y += rand_normal(state, 0, 0.2);
 
+                // Pseudo row major strides (since 2 dim is hardcoded)
+                // TODO: Change this to invovle the first dimension for the class idx
                 int tmp_idx = data_dims * (i * num_data_points + j);
-                dataset->class_dpoints[tmp_idx] = x;
-                dataset->class_dpoints[tmp_idx + 1] = y;
+                dataset->class_dpoints[tmp_idx] = i;
+                dataset->class_dpoints[tmp_idx + 1] = x;
+                dataset->class_dpoints[tmp_idx + 2] = y;
             }
         }
     }
