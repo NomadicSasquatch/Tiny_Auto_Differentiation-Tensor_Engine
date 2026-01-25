@@ -199,7 +199,8 @@ int main(int argc, char* argv[]) {
 
         // BGD for now
         // Not sure if this shuffling is sufficient, loop per data isntance outside then per class inside.
-        for(int it = 0; it < n_per_class; it++) {
+        // TODO: might not need the additional dimension for the storage of the class since we already have the value at the start of the training loop
+       for(int it = 0; it < n_per_class; it++) {
             int data_idx = shuffle_dpoint_arr[it];
 
             for(int j = 0; j < num_classes; j++) {
@@ -211,7 +212,7 @@ int main(int argc, char* argv[]) {
                 graph_init(&graph, &scratch);
 
                 // Value 3 is hard_coded_input_dim + 1 for class index
-                int64_t input_shape[2] = { 1, 2 };
+                int64_t input_shape[2] = { 1, hard_coded_input_dim };
                 Tensor* tensor = tensor_new(&scratch, hard_coded_input_dim, input_shape);
                 size_t num_elements = total_elems(tensor);
 
@@ -222,7 +223,7 @@ int main(int argc, char* argv[]) {
                     tensor->data[k] = dataset.class_dpoints[base_idx + k];
                 }
 
-                Node* xnode = graph_add_input(&graph, tensor);
+                Node* input_node = graph_add_input(&graph, tensor);
             }
 
         }
