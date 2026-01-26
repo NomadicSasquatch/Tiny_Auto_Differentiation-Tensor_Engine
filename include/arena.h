@@ -86,6 +86,13 @@ static inline void arena_reset(Arena* arena) {
     arena->curr = arena->base;
 }
 
+static inline void arena_free(Arena* arena) {
+    if(!arena || !arena->base) return;
+    size_t bytes = (size_t)(arena->end - arena->base);
+    munmap(arena->base, bytes);
+    arena->base = arena->curr = arena->end = NULL;
+}
+
 #ifdef __cplusplus
 }
 #endif
