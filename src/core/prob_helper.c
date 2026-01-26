@@ -49,7 +49,7 @@ float rand_uniform(uint32_t* state, float low, float high) {
         from 2 * pi * U2 and radius having rayleigh distribution from sqrt(-2ln(U1))
     -> We can then convert this standard normal to any normal with mean mu and std sigma */
     
-static float rand_normal(uint32_t* state, float mean, float std) {
+float rand_normal(uint32_t* state, float mean, float std) {
     float u1 = rand_uniform01(state);
     float u2 = rand_uniform01(state);
 
