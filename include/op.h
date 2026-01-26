@@ -1,6 +1,7 @@
 #ifndef OP_H
 #define OP_H
 
+#include "graph.h"
 #include <stdlib.h>
 #include <stdio.h>
 
