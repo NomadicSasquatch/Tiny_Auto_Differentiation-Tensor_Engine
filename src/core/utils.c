@@ -1,7 +1,7 @@
 #include "tinyengine.h"
 #include "utils.h"
 
-void fatal_(const char* file, int line, const char* fmt, ...) {
+void fatalf(const char* file, int line, const char* fmt, ...) {
     fprintf(stderr, "Fatal (%s:%d): ", file, line);
 
     va_list args;
