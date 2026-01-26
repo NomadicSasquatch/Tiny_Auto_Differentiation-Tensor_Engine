@@ -45,14 +45,15 @@ typedef struct {
     size_t capacity;
 } Graph;
 
-void graph_init(Graph *g, Arena* arena);
+void graph_init(Graph* graph, Arena* arena);
 void graph_free(Graph* g);
 // Leaf or input node, to wrap an existing tensor as the input node
 Node* graph_add_input(Graph* g, Tensor* t);
-Tensor* add_node(Graph *g, Op op, int n_in, Node **inputs);
-void topo_sort(Graph *g, Node ***out_order, size_t *out_n);
-void forward(Graph *g, Node **order, size_t n);
-void backward(Graph *g, Node **order, size_t n, Tensor *loss);
+Tensor* add_node(Graph* graph, Op op, int n_in, Node **inputs);
+void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs);
+void graph_forward_pass(Graph* graph, Node** order, size_t order_size);
+void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* loss);
+Node* graph_optimiser_pass(Graph* graph, Node** order, size_t order_size);
 
 #ifdef __cplusplus
 }

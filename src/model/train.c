@@ -259,7 +259,7 @@ int main(int argc, char* argv[]) {
                 // TODO: Implement per op, pseudo for now
                 // mlp_sgd_step(&nn, lr);
 
-                mlp_zero_grads(&nn);
+                // mlp_zero_grads(&nn);
 
                 free(order);
                 graph_free(&graph);

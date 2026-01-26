@@ -54,7 +54,7 @@ void init_mlp(MLP* nn,
             Activation hidden_activation,
             InitScheme hidden_init, 
             InitScheme output_init, 
-            unsigned* rng_state);
+            uint32_t* rng_state);
 Node* mlp_forward(Graph* graph, Node* input, const MLP* nn);
 void mlp_free(MLP* nn);
 

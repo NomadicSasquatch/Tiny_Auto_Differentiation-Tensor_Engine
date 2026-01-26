@@ -258,8 +258,6 @@ void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* 
     if(loss_elems != 1) {
         fatal("graph_backward_pass cannot run: loss must be a scalar / 1 dimension, loss has %d elements", loss_elems);
     }
-    // training should already assign the loss value, for testing/toy examples
-    // loss->grad->data[0] = 1.0f;
 
     for(size_t i = order_size - 1; i >= 0; i--) {
         Node* node = order[i];
@@ -284,5 +282,16 @@ void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* 
 
         curr_opp->backward(node);
     }
+}
 
+void graph_optimiser_pass(Graph* graph, Node** order, size_t order_size, Optimiser optimiser_type) {
+    if(!graph || !order) {
+        fatal("graph_optimiser_pass cannot run: input is NULL");
+    }
+
+    for(size_t i = order_size - 1; i >= 0; i--) {
+        Node* node = order[i];
+
+        
+    }
 }
