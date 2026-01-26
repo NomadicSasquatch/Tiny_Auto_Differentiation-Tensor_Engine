@@ -282,7 +282,7 @@ void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* 
             fatal("graph_backward_pass cannot run: op backpropagation is missing, op index: %d", (int) node->operation);
         }
 
-        curr_opp->backward;
+        curr_opp->backward(node);
     }
 
 }
