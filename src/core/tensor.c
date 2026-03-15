@@ -86,7 +86,7 @@ void tensor_fill(Tensor* tensor, float value) {
 
 Tensor* tensor_zeroes_like(Arena* arena, const Tensor* like) {
     if(!like) {
-        return;
+        return NULL;
     }
 
     Tensor* new_tensor = tensor_new(arena, like->ndim, like->shape);
@@ -94,3 +94,88 @@ Tensor* tensor_zeroes_like(Arena* arena, const Tensor* like) {
 
     return new_tensor;
 }
+
+void print_tensor_recursive(const Tensor* t, int dim, int64_t offset) {
+    if (dim == t->ndim) {
+        printf("%g", t->data[offset]);
+        return;
+    }
+
+    printf("[");
+    for (int64_t i = 0; i < t->shape[dim]; i++) {
+        if (i > 0) {
+            if (dim == t->ndim - 1) {
+                printf(", ");
+            } else {
+                printf(",\n");
+                for (int j = 0; j < dim + 1; j++) {
+                    printf(" ");
+                }
+            }
+        }
+        print_tensor_recursive(t, dim + 1, offset + i * t->stride[dim]);
+    }
+    printf("]");
+}
+
+void print_tensor(const Tensor* t) {
+    if (!t) {
+        printf("Tensor(NULL)\n");
+        return;
+    }
+
+    printf("Tensor(\n");
+
+    printf("  ndim=%d,\n", t->ndim);
+
+    printf("  shape=[");
+    for (int i = 0; i < t->ndim; i++) {
+        printf("%lld", (long long)t->shape[i]);
+        if (i < t->ndim - 1) printf(", ");
+    }
+    printf("],\n");
+
+    printf("  stride=[");
+    for (int i = 0; i < t->ndim; i++) {
+        printf("%lld", (long long)t->stride[i]);
+        if (i < t->ndim - 1) printf(", ");
+    }
+    printf("],\n");
+
+    printf("  data=");
+    if (!t->data) {
+        printf("NULL\n");
+    } else if (t->ndim == 0) {
+        printf("%g\n", t->data[0]);
+    } else {
+        print_tensor_recursive(t, 0, 0);
+        printf("\n");
+    }
+
+    printf(")\n");
+}
+
+#ifdef TENSOR_SELFTEST_MAIN
+#include "tensor.h"
+
+int main(void) {
+    Arena a;
+    Tensor* t;
+    arena_init(&a, 4096);
+    const int64_t t_shape[2] = {2, 3};
+
+    t = tensor_new(&a, 2, t_shape);
+    print_tensor(t);
+
+    tensor_fill(t, 3.0);
+    print_tensor(t);
+
+    Tensor* t2 = tensor_zeroes_like(&a, t);
+    print_tensor(t2);
+
+
+    arena_free(&a);
+    return 0;
+}
+
+#endif

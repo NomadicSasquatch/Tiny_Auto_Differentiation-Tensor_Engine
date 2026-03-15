@@ -3,6 +3,8 @@
 
 #include "arena.h"
 
+typedef struct Arena Arena;
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
