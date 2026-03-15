@@ -1,5 +1,6 @@
 #include "tinyengine.h"
 #include "utils.h"
+#include <stdarg.h>
 
 void fatalf(const char* file, int line, const char* fmt, ...) {
     fprintf(stderr, "Fatal (%s:%d): ", file, line);
