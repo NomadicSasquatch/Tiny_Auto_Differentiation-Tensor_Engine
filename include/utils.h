@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "tinyengine.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -16,11 +15,16 @@ extern "C" {
 void fatalf(const char* file, int line, const char* fmt, ...);
 #define fatal(...) fatalf(__FILE__, __LINE__, __VA_ARGS__)
 
-// Round pointer so that subsequent allocations are aligned(eg cache line) and avoid msialigned access, the alignment a would be taken from alignof() (for power of two expectation)
-#define ALIGN_UP(p, a)                           \
+// Round pointer so that subsequent allocations are aligned (eg cache line)
+// and avoid misaligned access. The alignment `a` would be taken from
+// `alignof()` (power-of-two expected).
+#ifndef ALIGN_UP
+#define ALIGN_UP(p, a) \
         (void*)((((uintptr_t)(p) + ((a)-1)) & ~((uintptr_t)((a)-1))))
+#endif
 
-// A kind of portable constructor attribute (GCC/Clang). If not available, users can call an explicit init function later.
+// A kind of portable constructor attribute (GCC/Clang). If not available,
+// users can call an explicit init function later.
 #if defined(__GNUC__) || defined(__clang__)
 #define TINYENGINE_CONSTRUCTOR __attribute__((constructor))
 #else
