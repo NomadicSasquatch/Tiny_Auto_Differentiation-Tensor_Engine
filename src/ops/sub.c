@@ -41,8 +41,6 @@ static void register_sub_kernel(void) {
 }
 
 #ifdef SUB_SELFTEST_MAIN
-#include <assert.h>
-#include <stdio.h>
 
 int main(void) {
     const int64_t dim_a[2] = {2, 3};

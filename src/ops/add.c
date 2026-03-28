@@ -39,8 +39,6 @@ static void register_add_kernel(void) {
 }
 
 #ifdef ADD_SELFTEST_MAIN
-#include <assert.h>
-#include <stdio.h>
 
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
