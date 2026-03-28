@@ -79,10 +79,17 @@ selftest-add: $(BINDIR)/add_selftest
 $(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DADD_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
-	
+
+selftest-sub: $(BINDIR)/sub_selftest
+	./$(BINDIR)/sub_selftest
+ 
+$(BINDIR)/sub_selftest: src/ops/sub.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DSUB_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
+
 selftest-registry: \
 	selftest-add \
-# 	selftest-sub \
+	selftest-sub \
 # 	selftest-mul \
 # 	selftest-matmul \
 # 	selftest-relu \

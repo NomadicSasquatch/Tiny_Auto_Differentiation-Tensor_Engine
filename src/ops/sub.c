@@ -35,7 +35,19 @@ static const OpKernel sub_kernel = {
     .backward = sub_bwd,
 };
 
-TINYENGINE_CONSTRUCTOR
+__attribute__((constructor))
 static void register_sub_kernel(void) {
     register_opkernel(&sub_kernel);
 }
+
+#ifdef SUB_SELFTEST_MAIN
+#include <assert.h>
+#include <stdio.h>
+
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+
+    testOp(OP_SUB, dim_a, dim_a, dim_a, 3.0, 2.0, 1.0);
+    return 0;
+}
+#endif
