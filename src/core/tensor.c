@@ -156,7 +156,6 @@ void print_tensor(const Tensor* t) {
 }
 
 #ifdef TENSOR_SELFTEST_MAIN
-#include "tensor.h"
 
 int main(void) {
     Arena a;

@@ -34,6 +34,8 @@ size_t total_elems(const Tensor* tensor);
 Tensor* tensor_new(Arena* arena, int ndim, const int64_t* shape);
 Tensor* tensor_zeroes_like(Arena* arena, const Tensor* like);
 void tensor_fill(Tensor* tensor, float value);
+void print_tensor_recursive(const Tensor* t, int dim, int64_t offset);
+void print_tensor(const Tensor* t);
 
 #ifdef __cplusplus
 }
