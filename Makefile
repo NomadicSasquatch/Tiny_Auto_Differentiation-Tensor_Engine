@@ -87,10 +87,17 @@ $(BINDIR)/sub_selftest: src/ops/sub.c src/core/tensor.c src/core/arena.c src/cor
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DSUB_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
+selftest-mul: $(BINDIR)/mul_selftest
+	./$(BINDIR)/mul_selftest
+
+$(BINDIR)/mul_selftest: src/ops/mul.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DMUL_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
+	
 selftest-registry: \
 	selftest-add \
 	selftest-sub \
-# 	selftest-mul \
+	selftest-mul \
 # 	selftest-matmul \
 # 	selftest-relu \
 # 	selftest-softmax

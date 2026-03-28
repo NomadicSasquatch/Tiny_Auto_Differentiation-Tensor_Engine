@@ -41,3 +41,14 @@ __attribute__((constructor))
 static void register_mul_kernel(void) {
     register_opkernel(&mul_kernel);
 }
+
+#ifdef MUL_SELFTEST_MAIN
+#include <stdio.h>
+
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+
+    testOp(OP_MUL, dim_a, dim_a, dim_a, 2.0, 3.0, 6.0);
+    return 0;
+}
+#endif
