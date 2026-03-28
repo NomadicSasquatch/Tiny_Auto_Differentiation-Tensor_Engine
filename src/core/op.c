@@ -2,6 +2,8 @@
 #include "utils.h"
 
 #include <string.h>
+#include <math.h>
+
 #define MAX_OPS 20
 
 static const OpKernel* registry[MAX_OPS];
@@ -17,6 +19,11 @@ const OpKernel* get_opkernel(Op optype) {
     if(optype < 0 || optype >= MAX_OPS) return NULL;
     
     return registry[optype];
+}
+
+static int areAlmostEqual(float a, float b) {
+    float epsilon = 0.00001f;
+    return fabs(a - b) < epsilon;
 }
 
 void testOp(Op op, const int64_t* sh_a, const int64_t* sh_b, const int64_t* sh_c, 
@@ -89,8 +96,8 @@ void testOp(Op op, const int64_t* sh_a, const int64_t* sh_b, const int64_t* sh_c
     print_tensor(check);
 
     for(size_t i = 0; i < total; i++) {
-        if(unary_out) assert(check->data[i] == unary_out[i]);
-        else assert(check->data[i] == fill_c);
+        if(unary_out) assert(areAlmostEqual(check->data[i], unary_out[i]));
+        else assert(areAlmostEqual(check->data[i], fill_c));
     }
 
     printf("%s selftest passed\n", k->name);

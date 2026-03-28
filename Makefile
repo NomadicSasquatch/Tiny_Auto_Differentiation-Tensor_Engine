@@ -108,11 +108,18 @@ $(BINDIR)/relu_selftest: src/ops/relu.c src/core/tensor.c src/core/arena.c src/c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DRELU_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
+selftest-softmax: $(BINDIR)/softmax_selftest
+	./$(BINDIR)/softmax_selftest
+
+$(BINDIR)/softmax_selftest: src/ops/softmax.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DSOFTMAX_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
+
 selftest-registry: \
 	selftest-add \
 	selftest-sub \
 	selftest-mul \
 	selftest-matmul \
 	selftest-relu \
-# 	selftest-softmax
+	selftest-softmax
 # OPS END
