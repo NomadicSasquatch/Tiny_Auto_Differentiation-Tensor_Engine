@@ -40,3 +40,57 @@ __attribute__((constructor))
 static void register_add_kernel(void) {
     register_opkernel(&add_kernel);
 }
+
+#ifdef ADD_SELFTEST_MAIN
+#include <assert.h>
+#include <stdio.h>
+
+int main(void) {
+    const OpKernel* k = get_opkernel(OP_ADD);
+
+    if(!k)  printf("FAIL: op %d not registered\n", (int)OP_ADD);
+    else printf("PASS: op %d is registered\n", (int)OP_ADD);
+
+    if(!k->forward) printf("FAIL: op %s has NULL forward\n", k->name);
+    else printf("PASS: op %s has valid forward\n", k->name);
+
+    if(!k->backward) printf("FAIL: op %s has NULL backward\n", k->name);
+    else printf("Pass: op %s has valid backward\n", k->name);
+
+    Arena arena;
+    arena_init(&arena, 1024);
+    Graph graph;
+    graph_init(&graph, &arena);
+
+    const int64_t t_shape[2] = {2, 3};
+
+    Tensor* a = tensor_new(&arena, 2, t_shape);
+    tensor_fill(a, 2.0);
+    Tensor* b = tensor_new(&arena, 2, t_shape);
+    tensor_fill(b, 3.0);
+    Tensor* out = tensor_new(&arena, 2, t_shape);
+    tensor_fill(out, 0);
+
+    Node* input1 = graph_add_input(&graph, a);
+    Node* input2 = graph_add_input(&graph, b);
+    Node** inputs = malloc(2 * sizeof(Node*));
+    inputs[0] = input1;
+    inputs[1] = input2;
+
+    Node* output = add_node(&graph, OP_ADD, 2, inputs);
+    Tensor* check = output->out;
+    size_t total = total_elems(check);
+
+    add_fwd(output);
+    print_tensor(check);
+
+    for(size_t i = 0; i < total; i++) {
+        assert(check->data[i] == 5);
+    }
+    printf("add selftest passed\n");
+    arena_free(&arena);
+    free(inputs);
+
+    return 0;
+}
+#endif

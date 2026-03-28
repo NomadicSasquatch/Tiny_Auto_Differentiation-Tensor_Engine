@@ -14,7 +14,6 @@ void fatalf(const char* file, int line, const char* fmt, ...) {
 }
 
 #ifdef UTILS_SELFTEST_MAIN
-#include "utils.h"
 #include <assert.h>
 
 int main(void) {

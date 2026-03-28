@@ -1,11 +1,7 @@
 #ifndef OP_H
 #define OP_H
 
-#include "graph.h"
-#include <stdlib.h>
-#include <stdio.h>
-
-struct Node;
+typedef struct Node Node;
 // Typedef but with a function pointer, for us to use in our OpKernel, to call the actual operations easier
 // Format: typedef {return_type} (*{function_name})({parameter_list});
 typedef void (*OpForward)(Node*);

@@ -104,7 +104,6 @@ int main(void) {
     printf("Has been reset: %d\n", (int)(((void*)arena.curr) == ((void*)p4)));
 
     arena_free(&arena);
-    arena_free(&arena);
     printf("arena selftest passed\n");
     return 0;
 }

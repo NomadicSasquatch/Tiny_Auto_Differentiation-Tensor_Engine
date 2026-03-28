@@ -22,7 +22,7 @@ TRAIN_SRC := src/model/train.c
 
 TRAIN_OBJS := $(patsubst %.c,$(OBJDIR)/%.o,$(LIB_SRCS) $(TRAIN_SRC))
 
-.PHONY: all clean run selftest-arena selftest-tensor selftest-registry
+.PHONY: all clean run selftest-arena selftest-tensor selftest-registry selftest-add selftest-sub selftest-mul selftest-matmul selftest-relu selftest-softmax
 
 all: $(BINDIR)/train
 
@@ -64,3 +64,27 @@ selftest-tensor: $(BINDIR)/tensor_selftest
 $(BINDIR)/tensor_selftest: src/core/tensor.c src/core/arena.c src/core/utils.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DTENSOR_SELFTEST_MAIN $^ -o $@
+
+selftest-graph: $(BINDIR)/graph_selftest
+	./$(BINDIR)/graph_selftest
+
+$(BINDIR)/graph_selftest: src/core/tensor.c src/core/arena.c src/core/utils.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DGRAPH_SELFTEST_MAIN $^ -o $@
+
+# better way to aggregate? OPS START
+selftest-add: $(BINDIR)/add_selftest
+	./$(BINDIR)/add_selftest
+
+$(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/registry.c src/core/graph.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DADD_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
+
+selftest-registry: \
+	selftest-add \
+# 	selftest-sub \
+# 	selftest-mul \
+# 	selftest-matmul \
+# 	selftest-relu \
+# 	selftest-softmax
+# OPS END
