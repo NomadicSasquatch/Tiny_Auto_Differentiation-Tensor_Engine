@@ -1,3 +1,9 @@
+#include "graph.h"
+#include "tensor.h"
+#include "utils.h"
+
+#include <assert.h>
+
 #ifndef OP_H
 #define OP_H
 
@@ -20,5 +26,10 @@ void register_opkernel(const OpKernel* kernel);
 
 // Get opkernel by its enum
 const OpKernel* get_opkernel(Op optype);
-
+// Simple testing function for each op, all 3 nodes are n_dim = 2
+// fill_(a,b,c) is the shape of input a,b and output c respectively
+// fill_a is the float to fill the first input's entire 2x3 tensor
+// fill_b is the float to fill the second output's entire 2x3 tensor
+// fill_c is the float that's expected to populate the entire output node's tensor
+void testOp(Op op, const int64_t* sh_a, const int64_t* sh_b, const int64_t* sh_c, float fill_a, float fill_b, float fill_c);
 #endif
