@@ -100,3 +100,15 @@ __attribute__((constructor))
 static void register_mul_kernel(void) {
     register_opkernel(&mat_mul_kernel);
 }
+
+#ifdef MATMUL_SELFTEST_MAIN
+
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+    const int64_t dim_b[2] = {3, 2};
+    const int64_t dim_c[2] = {2, 2};
+
+    testOp(OP_MATMUL, dim_a, dim_b, dim_c, 2.0, 3.0, 18.0);
+    return 0;
+}
+#endif

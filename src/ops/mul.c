@@ -43,7 +43,6 @@ static void register_mul_kernel(void) {
 }
 
 #ifdef MUL_SELFTEST_MAIN
-#include <stdio.h>
 
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
