@@ -12,7 +12,7 @@ static void relu_fwd(Node* node) {
     size_t number_elements = total_elems(C);
 
     for(size_t i = 0; i < number_elements; i++) {
-        A->data[i] = A->data[i] > 0.0f? A->data[i] : 0.0f;
+        C->data[i] = A->data[i] > 0.0f? A->data[i] : 0.0f;
     }
 }
 
@@ -37,6 +37,18 @@ static const OpKernel relu_kernel = {
 };
 
 __attribute__((constructor))
-static void register_add_kernel(void) {
+static void register_relu_kernel(void) {
     register_opkernel(&relu_kernel);
 }
+
+#ifdef RELU_SELFTEST_MAIN
+
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+    float fill_c[6] = {2.0, 2.0, 2.0, 0.0, 0.0, 0.0}; 
+
+    testOp(OP_RELU, dim_a, dim_a, dim_a, 2.0, 0.0, 2.0, fill_c);
+
+    return 0;
+}
+#endif

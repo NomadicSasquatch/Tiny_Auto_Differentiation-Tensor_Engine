@@ -32,5 +32,8 @@ const OpKernel* get_opkernel(Op optype);
 // fill_b is the float to fill the second output's entire 2x3 tensor
 // fill_c is the float that's expected to populate the entire output node's tensor
 // the order of operation is assert a OP b = c
-void testOp(Op op, const int64_t* sh_a, const int64_t* sh_b, const int64_t* sh_c, float fill_a, float fill_b, float fill_c);
+// unary_out is the float array to compare with a unary output tensor's data(from 0 to total_elems), if its NULL its not a unary op
+// in a unary op, fill_a is the input's first row values, fill_b is the input's second row values
+void testOp(Op op, const int64_t* sh_a, const int64_t* sh_b, const int64_t* sh_c, 
+    float fill_a, float fill_b, float fill_c, float* unary_out);
 #endif

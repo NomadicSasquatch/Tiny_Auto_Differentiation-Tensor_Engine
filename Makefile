@@ -101,11 +101,18 @@ $(BINDIR)/matmul_selftest: src/ops/matmul.c src/core/tensor.c src/core/arena.c s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DMATMUL_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
+selftest-relu: $(BINDIR)/relu_selftest
+	./$(BINDIR)/relu_selftest
+
+$(BINDIR)/relu_selftest: src/ops/relu.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DRELU_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
+
 selftest-registry: \
 	selftest-add \
 	selftest-sub \
 	selftest-mul \
 	selftest-matmul \
-# 	selftest-relu \
+	selftest-relu \
 # 	selftest-softmax
 # OPS END

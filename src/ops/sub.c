@@ -45,7 +45,7 @@ static void register_sub_kernel(void) {
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
 
-    testOp(OP_SUB, dim_a, dim_a, dim_a, 3.0, 2.0, 1.0);
+    testOp(OP_SUB, dim_a, dim_a, dim_a, 3.0, 2.0, 1.0, NULL);
     return 0;
 }
 #endif

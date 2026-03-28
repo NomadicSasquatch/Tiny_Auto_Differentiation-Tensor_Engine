@@ -96,7 +96,8 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
     }
 
     Tensor* A = inputs[0]->out;
-    Tensor* B = inputs[1]->out;
+    Tensor* B;
+    if(n_inputs == 2) B = inputs[1]->out;
 
     if(op == OP_ADD || op == OP_MUL || op == OP_SUB) {
         if(n_inputs != 2) {

@@ -43,7 +43,7 @@ static void register_add_kernel(void) {
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
 
-    testOp(OP_ADD, dim_a, dim_a, dim_a, 2.0, 3.0, 5.0);
+    testOp(OP_ADD, dim_a, dim_a, dim_a, 2.0, 3.0, 5.0, NULL);
     return 0;
 }
 #endif

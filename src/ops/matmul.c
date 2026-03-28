@@ -108,7 +108,7 @@ int main(void) {
     const int64_t dim_b[2] = {3, 2};
     const int64_t dim_c[2] = {2, 2};
 
-    testOp(OP_MATMUL, dim_a, dim_b, dim_c, 2.0, 3.0, 18.0);
+    testOp(OP_MATMUL, dim_a, dim_b, dim_c, 2.0, 3.0, 18.0, NULL);
     return 0;
 }
 #endif
