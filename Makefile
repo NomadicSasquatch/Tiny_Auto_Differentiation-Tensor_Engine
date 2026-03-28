@@ -8,7 +8,7 @@ BINDIR := build/bin
 
 CORE_SRCS := \
   src/core/arena.c src/core/graph.c src/core/prob_helper.c \
-  src/core/registry.c src/core/tensor.c src/core/utils.c
+  src/core/op.c src/core/tensor.c src/core/utils.c
 
 DATA_SRCS := src/data/dataset.c
 NN_SRCS := src/nn/loss.c src/nn/nn.c src/nn/optim.c
@@ -76,10 +76,10 @@ $(BINDIR)/graph_selftest: src/core/tensor.c src/core/arena.c src/core/utils.c
 selftest-add: $(BINDIR)/add_selftest
 	./$(BINDIR)/add_selftest
 
-$(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/registry.c src/core/graph.c
+$(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DADD_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
-
+	
 selftest-registry: \
 	selftest-add \
 # 	selftest-sub \

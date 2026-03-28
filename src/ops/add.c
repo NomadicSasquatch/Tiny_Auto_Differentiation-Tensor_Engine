@@ -81,7 +81,7 @@ int main(void) {
     Tensor* check = output->out;
     size_t total = total_elems(check);
 
-    add_fwd(output);
+    k->forward(output);
     print_tensor(check);
 
     for(size_t i = 0; i < total; i++) {
