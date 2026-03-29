@@ -259,7 +259,7 @@ void ensure_grad(Arena* arena, Tensor* tensor) {
     }
 }
 
-static void graph_ensure_grad(Graph* graph, Tensor* tensor) {
+void graph_ensure_grad(Graph* graph, Tensor* tensor) {
     if (!tensor) return;
     if (tensor->grad) return;
 

@@ -60,6 +60,7 @@ void graph_free(Graph* g);
 // Leaf or input node, to wrap an existing tensor as the input node
 Node* graph_add_input(Graph* g, Tensor* t);
 Node* add_node(Graph* graph, Op op, int n_in, Node **inputs);
+void graph_ensure_grad(Graph* graph, Tensor* tensor);
 void topological_sort(Graph* graph, Node*** output_order, size_t* total_outputs);
 void graph_forward_pass(Node* const* order, size_t order_size);
 void graph_backward_pass(Graph* graph, Node* const* order, size_t order_size, Tensor* loss);

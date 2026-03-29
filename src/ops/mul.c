@@ -46,8 +46,10 @@ static void register_mul_kernel(void) {
 
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
+    float fill_a[2] = {2.0, 20.0};
+    float fill_b[2] = {3.0, 15.0};
 
-    testOp(OP_MUL, dim_a, dim_a, dim_a, 2.0, 3.0, 6.0, NULL);
+    testOp(OP_MUL, dim_a, dim_a, dim_a, fill_a, fill_b, 6.0, NULL);
     return 0;
 }
 #endif

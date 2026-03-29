@@ -45,9 +45,12 @@ static void register_relu_kernel(void) {
 
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
+    float fill_a[2] = {2.0, 4.0};
+    float fill_b[2] = {0.0, 2.0};
+
     float unary_out[6] = {2.0, 2.0, 2.0, 0.0, 0.0, 0.0}; 
 
-    testOp(OP_RELU, dim_a, dim_a, dim_a, 2.0, 0.0, 2.0, unary_out);
+    testOp(OP_RELU, dim_a, dim_a, dim_a, fill_a, fill_b, 2.0, unary_out);
 
     return 0;
 }
