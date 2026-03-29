@@ -1,7 +1,5 @@
 #include "op.h"
-#include "graph.h"
-#include "tensor.h"
-#include "utils.h"
+#include "tester.h"
 
 #include <stddef.h>
 
@@ -35,7 +33,18 @@ static const OpKernel sub_kernel = {
     .backward = sub_bwd,
 };
 
-TINYENGINE_CONSTRUCTOR
+__attribute__((constructor))
 static void register_sub_kernel(void) {
     register_opkernel(&sub_kernel);
 }
+
+#ifdef SUB_SELFTEST_MAIN
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+    float fill_a[2] = {3.0, 4.0};
+    float fill_b[2] = {2.0, 1.0};
+
+    testOp(OP_SUB, dim_a, dim_a, dim_a, fill_a, fill_b, 1.0, NULL);
+    return 0;
+}
+#endif

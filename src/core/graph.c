@@ -1,12 +1,18 @@
-#include "tinyengine.h"
 #include "graph.h"
-#include "op.h"
 
 // graph capacity is hardcoded to a small value initially first, reinitialisation is done through realloc if size >= capacity
-void graph_init(Graph* graph) {
+void graph_init(Graph* graph, Arena* arena) {
+    if(!graph) {
+        fatal("graph_init: Graph is not allocated");
+    }
+    if(!arena) {
+        fatal("graph_init: Arena is not allocated");
+    }
+
+    graph->arena = arena;
     graph->size = 0;
     graph->capacity = 16;
-    graph->nodes = malloc(graph->capacity * sizeof(Node*));
+    graph->nodes = arena_alloc(arena, graph->capacity * sizeof(Node*), alignof(Node*));
 }
 
 // this part is a little sus, since there is no check with the arena at all
@@ -15,12 +21,28 @@ static void graph_size_validity_check(Graph* graph) {
         return;
     }
 
-    graph->capacity = (graph->capacity == 0)? 16 : 2 * graph->capacity;
-    graph->nodes = (Node**)realloc(graph->nodes, graph->capacity * sizeof(Node*));
+    size_t new_capacity = (graph->capacity == 0)? 16 : 2 * graph->capacity;
+    Node** new_nodes = arena_alloc(graph->arena, new_capacity * sizeof(Node*), alignof(Node*));
 
-    if(!graph->nodes) {
-        fatal("graph_size_validity_check cannot run: realloc failed");
+    if(graph->size > 0 && graph->nodes) {
+        memcpy(new_nodes, graph->nodes, graph->size * sizeof(Node*));
     }
+
+    graph->capacity = new_capacity;
+    graph->nodes = new_nodes;
+}
+
+static int ptr_in_arena(const Arena* arena, const void* p) {
+    if(!arena || !arena->base) {
+        printf("ptr_in_arena: Arena is not allocated.");
+        return 0;
+    }
+
+    const uint8_t* start = arena->base;
+    const uint8_t* end = arena->curr;
+    const uint8_t* curr = (const uint8_t*) p;
+
+    return (curr >= start && curr <= end);
 }
 
 void graph_free(Graph* graph) {
@@ -28,40 +50,27 @@ void graph_free(Graph* graph) {
         return;
     }
 
-    for(size_t i = 0; i < graph->size; i++) {
-        Node* tmp_node = graph->nodes[i];
-
-        if(!tmp_node) {
-            continue;
-        }
-        free(tmp_node->inputs);
-        free(tmp_node);
-    }
-
-    free(graph->nodes);
     memset(graph, 0, sizeof(*graph));
 }
 
 Node* graph_add_input(Graph* graph, Tensor* tensor) {
     if(!graph || !tensor) {
+        printf("graph_add_input: graph/tensor is not initialised.");
         return NULL;
     }
 
     graph_size_validity_check(graph);
-    Node* node = (Node*)calloc(1, sizeof(Node));
-
-    if(!node) {
-        fatal("graph_add_input cannot run: calloc failed");
-    }
+    Node* node = arena_alloc(graph->arena, sizeof(Node), alignof(Node));
+    memset(node, 0, sizeof(Node));
 
     node->operation = OP_INPUT;
     node->out = tensor;
     node->inputs = NULL;
-    node->n_input = 1;
-    node->topo_index = 0;
-    atomic_init(&node->pending_parents, 0);
+    node->n_input = 0;
+    node->topo_index = (int) graph->size;
 
     graph->nodes[graph->size++] = node;
+    node->users = NULL;
 
     return node;
 }
@@ -87,14 +96,21 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
     }
 
     Tensor* A = inputs[0]->out;
-    Tensor* B = inputs[1]->out;
+    Tensor* B;
+    if(n_inputs == 2) B = inputs[1]->out;
 
     if(op == OP_ADD || op == OP_MUL || op == OP_SUB) {
+        if(n_inputs != 2) {
+            fatal("infer_and_alloc_output: 2 Inputs is expected, but %d inputs received", n_inputs);
+        }
         ensure_same_shape(A, B);
 
         return tensor_new(graph->arena, A->ndim, A->shape);
     }
     else if(op == OP_MATMUL) {
+        if(n_inputs != 2) {
+            fatal("infer_and_alloc_output: 2 Inputs is expected, but %d inputs received", n_inputs);
+        }
         if(A->ndim != 2 || B->ndim !=2) {
             fatal("infer_and_alloc_output cannot run: matmul must involve 2 dimensional tensors");
         }
@@ -108,7 +124,13 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
 
         int64_t output_shape[2] = {ad1, bd2};
         
-        return new_tensor(graph->arena, 2, output_shape);
+        return tensor_new(graph->arena, 2, output_shape);
+    }
+    if (op == OP_RELU || op == OP_SOFTMAX || op == OP_SIGMOID || op == OP_TANH) {
+        if (n_inputs != 1) {
+            fatal("infer_and_alloc_output: unary op expects 1 input (got %d)", n_inputs);
+        }
+        return tensor_new(graph->arena, A->ndim, A->shape);
     }
 
     fatal("infer_and_alloc_output cannot run: OP type index (%d) is not supported", (int) op);
@@ -117,66 +139,56 @@ static Tensor* infer_and_alloc_output(Graph* graph, Op op, int n_inputs, Node** 
 }
 
 Node* add_node(Graph* graph, Op op, int n_inputs, Node** inputs) {
-    if(!graph || !inputs) return NULL;
+    if(!graph || !inputs) {
+        printf("add_node: graph/inputs is not initialised.");
+        return NULL;
+    }
     if(n_inputs <= 0) fatal("add_node: n_inputs must be > 0");
     if(op == OP_INPUT) fatal("add_node: OP_INPUT is reserved for leaves");
 
-    graph_grow_if_needed(graph);
+    graph_size_validity_check(graph);
 
-    Node* output_node = malloc(sizeof(Node));
-
-    if(!output_node) {
-        fatal("add_node cannot run: malloc failed for new node");
-    }
+    Node* output_node = arena_alloc(graph->arena, sizeof(Node), alignof(Node));
+    memset(output_node, 0, sizeof(Node));
 
     output_node->operation = op;
     output_node->n_input = n_inputs;
-    output_node->inputs = (Node*) malloc((size_t) n_inputs * sizeof(Node*));
-
-    if(!output_node->inputs) {
-        fatal("add_node cannot run: malloc for output_node->inputs failed");
-    }
+    output_node->inputs = arena_alloc(graph->arena, (size_t) n_inputs * sizeof(Node*), alignof(Node*));
 
     for(int i = 0; i < n_inputs; i++) {
         output_node->inputs[i] = inputs[i];
+
+        NodeUse* user = arena_alloc(graph->arena, sizeof(NodeUse), alignof(NodeUse));
+        user->user = output_node;
+        user->next = inputs[i]->users;
+        inputs[i]->users = user;
     }
 
     output_node->out = infer_and_alloc_output(graph, op, n_inputs, inputs);
-    atomic_init(&output_node->pending_parents, 0);
+    output_node->topo_index = (int) graph->size;
     graph->nodes[graph->size++] = output_node;
 
     return output_node;
 }
 
 // can consider to sort the order within the graph and not have another allocated space
-void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) {
+void topological_sort(Graph* graph, Node*** output_order, size_t* total_outputs) {
     if(!graph || !output_order || !total_outputs) {
         printf("topological sort error: one of the inputs is NULL");
 
-        return NULL;
+        return;
     }
 
     size_t total_nodes = graph->size;
     size_t order_idx = 0;
-    Node** order = (Node*) malloc(total_nodes * sizeof(Node*));
+    Node** order = arena_alloc(graph->arena, total_nodes * sizeof(Node*), alignof(Node*));
     
-    if(!order) {
-        fatal("topological sort cannot run: order malloc failed");
-    }
-
-    int* in_degree = calloc(total_nodes, sizeof(int));
-
-    if(!in_degree) {
-        fatal("topological sort cannot run: in_degree calloc failed");
-    }
+    int* in_degree = arena_alloc(graph->arena, total_nodes, alignof(int));
+    memset(in_degree, 0, total_nodes * sizeof(int));
 
     size_t head = 0, tail = 0;
-    size_t* queue = (size_t) malloc(total_nodes * sizeof(size_t));
+    Node** queue = arena_alloc(graph->arena, total_nodes * sizeof(Node*), alignof(Node*));
     
-    if(!queue) {
-        fatal("topological sort cannot run: queue malloc failed");
-    }
-
     for(size_t i = 0; i < total_nodes; i++) {
         graph->nodes[i]->topo_index = (int) i;
 
@@ -186,33 +198,28 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
 
     for(size_t i = 0; i < total_nodes; i++) {
         if(in_degree[i] == 0) {
-            queue[tail++] = i;
+            queue[tail++] = graph->nodes[i];
         }
     }
 
     while(head < tail) {
-        size_t src = queue[head++];
-        Node* src_node = graph->nodes[src];
+        Node* src_node = queue[head++];
         order[order_idx++] = src_node;
 
-        for(size_t i = 0; i < total_nodes; i++) {
-            Node* dst_node = graph->nodes[i];
-            for(int j = 0; j < dst_node->n_input; j++) {
-                if(dst_node->inputs[j] == src_node) {
-                    if(--in_degree[i] == 0) {
-                        queue[tail++] = i;
-                    }   
-                    break;
-                }
+        for(NodeUse* u = src_node->users; u; u = u->next) {
+            Node* child = u->user;
+            const size_t idx = child->topo_index;
+
+            if (idx >= total_nodes) {
+                fatal("topological_sort: topo_index out of bounds");
+            }
+            if(--in_degree[idx] == 0) {
+                queue[tail++] = child;
             }
         }
     }
 
-    free(queue);
-    free(in_degree);
-
     if(order_idx != total_nodes) {
-        free(order);
         fatal("topological sort cannot run: graph has a cycle or disconnected nodes");
     }
 
@@ -221,56 +228,75 @@ void topological_sort(Graph* graph, Node** output_order, size_t* total_outputs) 
 }
 
 // consider sorted graph order
-void graph_forward_pass(Graph* graph, Node** order, size_t order_size) {
-    for(size_t i = 0; i < order_size; i++) {
+void graph_forward_pass(Node* const* order, size_t order_size) {
+    if (!order && order_size != 0) {
+        fatal("graph_forward_pass: order is NULL");
+    }
+
+    for (size_t i = 0; i < order_size; i++) {
         Node* curr_node = order[i];
-        if(curr_node->operation == OP_INPUT) {
-            break;
+        if (curr_node->operation == OP_INPUT) {
+            continue;
         }
 
-        OpKernel* curr_opp = get_opkernel(curr_node->operation);
-        if(curr_opp < 0) {
-            fatal("forward pass cannot run: operator is not found in registry, operator id:%d", (int) curr_opp);
+        const OpKernel* k = get_opkernel(curr_node->operation);
+        if (!k || !k->forward) {
+            fatal("graph_forward_pass cannot run: missing forward kernel for op %d", (int)curr_node->operation);
         }
 
-        curr_opp->forward(curr_node);
+        k->forward(curr_node);
     }
 }
 
 // Make sure that there is something to propagate
-static void ensure_grad(Graph* graph, Tensor* tensor) {
-    if(!tensor->grad) {
-        tensor->grad = tensor_zeroes_like(graph->arena, tensor);
+void ensure_grad(Arena* arena, Tensor* tensor) {
+    if (!tensor) return;
+    if (!tensor->grad) {
+        if (!arena) {
+            fatal("ensure_grad cannot run: arena is NULL");
+        }
+        tensor->grad = tensor_zeroes_like(arena, tensor);
     }
+}
+
+void graph_ensure_grad(Graph* graph, Tensor* tensor) {
+    if (!tensor) return;
+    if (tensor->grad) return;
+
+    if (ptr_in_arena(graph->arena, tensor)) {
+        tensor->grad = tensor_zeroes_like(graph->arena, tensor);
+        return;
+    }
+
+    // If we get here, theres probably a parameter tensor living in a persistent arena, allocating its grad in the scratch arena would leave a dangling pointer after arena_reset().
+    fatal("graph_backward: encountered a non-graph tensor with grad==NULL.");
 }
 
 // Consider sorted graph order
 // Loss param is the output loss scalar
-void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* loss) {
+void graph_backward_pass(Graph* graph, Node* const* order, size_t order_size, Tensor* loss) {
     if(!graph || !order || !loss) {
         fatal("graph_backward_pass cannot run: input is NULL");
     }
 
-    ensure_grad(graph, loss);
+    graph_ensure_grad(graph, loss);
     size_t loss_elems = total_elems(loss);
 
     if(loss_elems != 1) {
         fatal("graph_backward_pass cannot run: loss must be a scalar / 1 dimension, loss has %d elements", loss_elems);
     }
-    // training should already assign the loss value, for testing/toy examples
-    // loss->grad->data[0] = 1.0f;
 
-    for(size_t i = order_size - 1; i >= 0; i--) {
+    for(int i = order_size - 1; i >= 0; i--) {
         Node* node = order[i];
 
         if(node->operation == OP_INPUT) {
             break;
         }
 
-        ensure_grad(graph, node->out);
+        graph_ensure_grad(graph, node->out);
         // Again, this loop considers the possibility that there are more than one inputs per node, but now everything is hard coded to 2 inputs, since fused kernels are not considered
         for(int j = 0; j < node->n_input; j++) {
-            ensure_grad(graph, node->inputs[i]->out);
+            graph_ensure_grad(graph, node->inputs[i]->out);
         }
 
         const OpKernel* curr_opp = get_opkernel(node->operation);
@@ -281,7 +307,28 @@ void graph_backward_pass(Graph* graph, Node** order, size_t order_size, Tensor* 
             fatal("graph_backward_pass cannot run: op backpropagation is missing, op index: %d", (int) node->operation);
         }
 
-        curr_opp->backward;
+        curr_opp->backward(node);
     }
-
 }
+
+// void graph_optimiser_pass(Graph* graph, Node** order, size_t order_size, Optimiser optimiser_type) {
+//     if(!graph || !order) {
+//         fatal("graph_optimiser_pass cannot run: input is NULL");
+//     }
+
+//     for(size_t i = order_size - 1; i >= 0; i--) {
+//         Node* node = order[i];
+
+        
+//     }
+// }
+
+#ifdef DGRAPH_SELFTEST_MAIN
+#include "op.h"
+
+int main() {
+
+
+    return 0;
+}
+#endif

@@ -19,8 +19,8 @@ void sgd_step(Tensor* tensor, float lr) {
     size_t number_elements = total_elems(tensor);
 
     for(size_t i = 0; i < number_elements; i++) {
-        tensor->grad->data[i] -= lr * tensor->grad->data[i];
+        tensor->data[i] -= lr * tensor->grad->data[i];
     }
 }
 
-// no adam yet, did not add momentum or velocity fields into tensor struct
+// TODO: no adam yet, did not add momentum or velocity fields into tensor struct

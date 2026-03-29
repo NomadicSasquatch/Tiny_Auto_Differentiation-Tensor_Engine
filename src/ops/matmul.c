@@ -1,7 +1,5 @@
 #include "op.h"
-#include "graph.h"
-#include "tensor.h"
-#include "utils.h"
+#include "tester.h"
 
 #include <stddef.h>
 
@@ -100,3 +98,18 @@ __attribute__((constructor))
 static void register_mul_kernel(void) {
     register_opkernel(&mat_mul_kernel);
 }
+
+#ifdef MATMUL_SELFTEST_MAIN
+
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+    const int64_t dim_b[2] = {3, 2};
+    const int64_t dim_c[2] = {2, 2};
+
+    float fill_a[2] = {2.0, 110.0};
+    float fill_b[2] = {3.0, 43.0};
+
+    testOp(OP_MATMUL, dim_a, dim_b, dim_c, fill_a, fill_b, 18.0, NULL);
+    return 0;
+}
+#endif

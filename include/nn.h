@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "utils.h"
 #include "op.h"
+#include "probhelper.h"
 
 #include <math.h>
 
@@ -36,6 +37,7 @@ typedef struct Linear {
     Tensor* bias;
 } Linear;
 
+// Perhaps should add more metadata, to update in model.h
 typedef struct MLP {
     int num_layers;
     Linear* layers;
@@ -52,8 +54,11 @@ void init_mlp(MLP* nn,
             Activation hidden_activation,
             InitScheme hidden_init, 
             InitScheme output_init, 
-            unsigned* rng_state);
+            uint32_t* rng_state);
 Node* mlp_forward(Graph* graph, Node* input, const MLP* nn);
+Node* apply_activation(Graph* graph, Activation activation, Node* input);
+void mlp_zero_grads(MLP* nn);
+void mlp_sgd_step(MLP* nn, float lr);
 void mlp_free(MLP* nn);
 
 

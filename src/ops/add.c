@@ -1,7 +1,5 @@
 #include "op.h"
-#include "graph.h"
-#include "tensor.h"
-#include "utils.h"
+#include "tester.h"
 
 #include <stddef.h>
 
@@ -40,3 +38,14 @@ __attribute__((constructor))
 static void register_add_kernel(void) {
     register_opkernel(&add_kernel);
 }
+
+#ifdef ADD_SELFTEST_MAIN
+int main(void) {
+    const int64_t dim_a[2] = {2, 3};
+    float fill_a[2] = {2.0, 7.0};
+    float fill_b[2] = {3.0, 8.0};
+
+    testOp(OP_ADD, dim_a, dim_a, dim_a, fill_a, fill_b, 5.0, NULL);
+    return 0;
+}
+#endif
