@@ -56,6 +56,9 @@ void init_mlp(MLP* nn,
             InitScheme output_init, 
             uint32_t* rng_state);
 Node* mlp_forward(Graph* graph, Node* input, const MLP* nn);
+Node* apply_activation(Graph* graph, Activation activation, Node* input);
+void mlp_zero_grads(MLP* nn);
+void mlp_sgd_step(MLP* nn, float lr);
 void mlp_free(MLP* nn);
 
 
