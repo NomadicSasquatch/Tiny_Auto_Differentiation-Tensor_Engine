@@ -1,7 +1,5 @@
 #include "op.h"
-#include "graph.h"
-#include "tensor.h"
-#include "utils.h"
+#include "tester.h"
 
 #include <stddef.h>
 
@@ -41,7 +39,6 @@ static void register_sub_kernel(void) {
 }
 
 #ifdef SUB_SELFTEST_MAIN
-
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
     float fill_a[2] = {3.0, 4.0};

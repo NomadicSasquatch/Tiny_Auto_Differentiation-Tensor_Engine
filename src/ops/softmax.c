@@ -1,10 +1,7 @@
 #include "op.h"
-#include "graph.h"
-#include "tensor.h"
-#include "utils.h"
+#include "tester.h"
 
 #include <stddef.h>
-#include <math.h>
 #include <stdio.h>
 
 // Take softmax as softmax per row, only for up till 2D (taking it as softmax per batch)

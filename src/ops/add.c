@@ -1,4 +1,5 @@
 #include "op.h"
+#include "tester.h"
 
 #include <stddef.h>
 
@@ -39,7 +40,6 @@ static void register_add_kernel(void) {
 }
 
 #ifdef ADD_SELFTEST_MAIN
-
 int main(void) {
     const int64_t dim_a[2] = {2, 3};
     float fill_a[2] = {2.0, 7.0};

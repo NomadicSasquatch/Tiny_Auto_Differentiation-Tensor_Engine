@@ -76,42 +76,42 @@ $(BINDIR)/graph_selftest: src/core/tensor.c src/core/arena.c src/core/utils.c
 selftest-add: $(BINDIR)/add_selftest
 	./$(BINDIR)/add_selftest
 
-$(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/add_selftest: src/ops/add.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DADD_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
 selftest-sub: $(BINDIR)/sub_selftest
 	./$(BINDIR)/sub_selftest
  
-$(BINDIR)/sub_selftest: src/ops/sub.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/sub_selftest: src/ops/sub.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DSUB_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
 selftest-mul: $(BINDIR)/mul_selftest
 	./$(BINDIR)/mul_selftest
 
-$(BINDIR)/mul_selftest: src/ops/mul.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/mul_selftest: src/ops/mul.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DMUL_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
 selftest-matmul: $(BINDIR)/matmul_selftest
 	./$(BINDIR)/matmul_selftest
 
-$(BINDIR)/matmul_selftest: src/ops/matmul.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/matmul_selftest: src/ops/matmul.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DMATMUL_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
 selftest-relu: $(BINDIR)/relu_selftest
 	./$(BINDIR)/relu_selftest
 
-$(BINDIR)/relu_selftest: src/ops/relu.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/relu_selftest: src/ops/relu.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DRELU_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
 selftest-softmax: $(BINDIR)/softmax_selftest
 	./$(BINDIR)/softmax_selftest
 
-$(BINDIR)/softmax_selftest: src/ops/softmax.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c
+$(BINDIR)/softmax_selftest: src/ops/softmax.c src/core/tensor.c src/core/arena.c src/core/utils.c src/core/op.c src/core/graph.c src/core/tester.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DSOFTMAX_SELFTEST_MAIN $^ -o $@ $(LDLIBS)
 
